@@ -1,3 +1,16 @@
-<h1>Welcome to your library project</h1>
-<p>Create your package using @sveltejs/package and preview/showcase your work with SvelteKit</p>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script>
+    import Meta from "../components/Meta.svelte";
+    import Index from "../components/Index.svelte";
+
+    	const preloadFont = [
+		// "https://pudding.cool/assets/fonts/tiempos/TiemposTextWeb-Regular.woff2",
+		// "https://pudding.cool/assets/fonts/tiempos/TiemposTextWeb-Bold.woff2",
+		// "https://pudding.cool/assets/fonts/national/National2Web-Regular.woff2",
+		// "https://pudding.cool/assets/fonts/national/National2Web-Bold.woff2"
+	];
+</script>
+
+<Meta {preloadFont} />
+<Index />
+
+
