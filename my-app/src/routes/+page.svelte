@@ -1,6 +1,7 @@
 <script>
     import Meta from "../components/Meta.svelte";
     import Index from "../components/Index.svelte";
+	export const prerender = true;
 
     	const preloadFont = [
 		// "https://pudding.cool/assets/fonts/tiempos/TiemposTextWeb-Regular.woff2",
