@@ -24,6 +24,11 @@
 
   let windowWidth = 0;
 
+  function setViewportHeight() {
+	const vh = window.innerHeight * 0.01;
+	document.documentElement.style.setProperty('--vh', `${vh}px`);
+}
+
   const gameContentOpacity = new Tween(0, {
     duration: 1000,
     easing: cubicOut,
@@ -104,6 +109,8 @@
   }
 
   onMount(() => {
+    setViewportHeight();
+
     if (gameCounter == 1) {
       setTimeout(() => {
         typeWriter("title", "ETYMOLOGY");
@@ -391,7 +398,7 @@
   .page-container-1 {
     display: flex;
     width: 100vw;
-    height: 100vh;
+    height: calc(var(--vh, 1vh) * 100);
     position: absolute;
     opacity: 1;
     justify-content: center;

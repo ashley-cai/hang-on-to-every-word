@@ -7,6 +7,8 @@
 	import { cubicOut } from "svelte/easing";
 	import { onMount } from "svelte";
 	import { getContext } from "svelte";
+	import { fade } from 'svelte/transition';
+
 
 
 	let gameStart = "";
@@ -65,14 +67,21 @@
 		if (cartVisible === openCartOffset) {
 			cartVisible = closedCartOffset;
 			cartVisibleColor = midGray;
+			isCartOpen = false;
 		} else {
 			cartVisible = openCartOffset;
 			cartVisibleColor = darkGray;
 			isCartOpen = true;
 
+			if (itemsCart.length === 0) {
 			// Step 1: Mark rack and grid items to bounce out
+			const rackWords = new Set(items1.map(item => item.word));
+			const filteredGridItems = itemsStart[gameNumber].filter(item => !rackWords.has(item.word));
+			console.log(filteredGridItems)
+
+			// Mark all for bounce out
 			items1 = items1.map(item => ({ ...item, bounceOut: true }));
-			itemsStart[gameNumber] = itemsStart[gameNumber].map(item => ({ ...item, bounceOut: true }));
+			filteredGridItems.forEach(item => item.bounceOut = true);
 
 			// Step 2: Wait for bounce-out, then move to cart
 			setTimeout(() => {
@@ -88,6 +97,7 @@
 				items1 = [];
 				itemsStart[gameNumber] = [];
 			}, 600);
+		}
 		}
 	}
 }
@@ -195,7 +205,7 @@
 		</div>
 	</div>
 	{#if isCartOpen}
-		<div class="overlay" style="opacity: {endTransition}"></div>
+		<div transition:fade="{{ duration: 300 }}" class="overlay" style="opacity: {endTransition}"></div>
 	{/if}
 	<div class="page-contents">
 		<div class="header-container" style="opacity: {winConditionFade}">
