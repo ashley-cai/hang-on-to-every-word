@@ -8,6 +8,7 @@
 	export let y = 0;
 	export let slot;
 	export let index =0;
+	export let bounceOut;
 
 	function handleDnd(e) {
 		items = e.detail.items;
@@ -26,8 +27,15 @@
 <!-- style="{items.find(tile => tile[SHADOW_ITEM_MARKER_PROPERTY_NAME]) ? 'background: rgba(255, 255, 255, 0.2)': ''}" -->
 <div bind:this={slot} class="square" style="transform:translate({x}vw,{y}vh)"	use:dndzone={options} on:consider={handleDnd} on:finalize={handleDnd}>
 	{#each items as tile (tile.id)}
-	  <Tile word={tile.word} shouldBounce = {true} index = {index}/>
-	{/each}
+	<Tile
+	  word={tile.word}
+	  shouldBounce={true}
+	  index={index}
+	  hidden={tile[SHADOW_ITEM_MARKER_PROPERTY_NAME]}
+	  bounceOut = {bounceOut}
+	/>
+  {/each}
+  
 </div>
 
 <style>

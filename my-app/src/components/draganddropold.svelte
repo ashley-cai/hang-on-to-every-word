@@ -5,8 +5,8 @@
 	import Tile from './Tile.svelte';
 	import Slot from './Slot.svelte';
 
-	let darkGray = '#2F2F2F';
-	let midGray = '#9A9A9A';
+	let darkGray = '#1c1c1c';
+	let midGray = '#8e8d8c';
 	let lightGray = '#e6e6e6';
 
 

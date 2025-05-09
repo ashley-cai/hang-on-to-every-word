@@ -7,8 +7,8 @@
 	import { Tween } from "svelte/motion";
 	import { cubicOut } from "svelte/easing";
 
-	let darkGray = "#2F2F2F";
-	let midGray = "#9A9A9A";
+	let darkGray = "#1c1c1c";
+	let midGray = "#8e8d8c";
 	let lightGray = "#e6e6e6";
     let errorRed = "#880000";
 	let correctGreen = "#E8FFB7";
@@ -18,7 +18,7 @@
 	export let transitionWidth;
 	let windowWidth = 0;
 
-	const gameOpacity = new Tween(0, { duration: 1000, easing: cubicOut });
+	const gameContentOpacity = new Tween(0, { delay: 1000, duration: 1000, easing: cubicOut });
 	const gameHeight = new Tween(transitionHeight, {
 		duration: 500,
 		easing: cubicOut,
@@ -56,7 +56,7 @@
 	}
 
 	$: if (gameCounter == 6) {
-		gameOpacity.target = 1;
+		gameContentOpacity.target = 1;
 	}
 
 	let container;
@@ -110,11 +110,10 @@
 			handleResize(); // set initial size
 			window.addEventListener("resize", handleResize);
 		}
-		if (gameCounter == 4) {
 			setTimeout(() => {
 				typeWriter("instructions", "HANG ON...");
 			}, 1000);
-		}
+		
 		if (!browser) return;
 
 		width = window.innerWidth;
@@ -312,12 +311,12 @@
 	{#if showModal}
 		<div
 			class="modal"
-			style="  opacity:{gameOpacity.current}; width: {gameWidth.current}px; height: {gameHeight.current}px"
+			style=" width: {gameWidth.current}px; height: {gameHeight.current}px"
 			on:click={handleModalClick}
 			transition:fade
 		>
-			<div class="loader"></div>
-			<div id="instructions">HANG ON...</div>
+			<div style="opacity: {gameContentOpacity.current}" class="loader"></div>
+			<div style="opacity: {gameContentOpacity.current}" id="instructions"></div>
 		</div>
 	{/if}
 </div>
@@ -359,18 +358,19 @@
 		justify-content: center;
 		color: var(--light-gray);
 		font-size: 1.2rem;
-		cursor: pointer;
+		/* cursor: pointer; */
 		user-select: none;
 	}
 
 	.loader {
-		border: 6px solid #ccc;
-		border-top: 6px solid white;
+		border: 2px solid var(--dark-gray);
+		border-top: 3px solid var(--light-gray);
 		border-radius: 50%;
 		width: 40px;
 		height: 40px;
 		animation: spin 0.8s linear infinite;
 		margin-bottom: 1rem;
+		-webkit-filter: drop-shadow(0px 0px 4px var(--light-gray));
 	}
 
 	#instructions {

@@ -4,8 +4,8 @@
   import { cubicOut, cubicInOut } from "svelte/easing";
   import { tick } from "svelte";
 
-  let darkGray = "#2F2F2F";
-  let midGray = "#9A9A9A";
+  let darkGray = "#1c1c1c";
+  let midGray = "#8e8d8c";
   let lightGray = "#e6e6e6";
   let errorRed = "#880000";
   export let transitionHeight;

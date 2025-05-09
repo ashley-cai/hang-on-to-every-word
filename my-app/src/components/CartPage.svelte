@@ -6,6 +6,8 @@
 	import { Tween } from "svelte/motion";
 	import { cubicOut } from "svelte/easing";
 	import { onMount } from "svelte";
+	import { getContext } from "svelte";
+
 
 	let gameStart = "";
 	export let transitionHeight;
@@ -15,12 +17,12 @@
 	const cartWidth = new Tween(0, { duration: 500, easing: cubicOut });
 	const cartOpacity = new Tween(1, { duration: 1000, easing: cubicOut });
 
-	let darkGray = "#2F2F2F";
-	let midGray = "#9A9A9A";
+	let darkGray = "#1c1c1c";
+	let midGray = "#8e8d8c";
 	let lightGray = "#e6e6e6";
 
 	export let gameCounter = 0; // overall games
-	let gameNumber = 0; // within this game
+	let gameNumber = 2; // within this game
 
 	let screenWidth = 0;
 
@@ -45,20 +47,53 @@
 	let cartCenter = "";
 
 	let cartVisibleColor = midGray;
-	let endTransition = 1;
+	let endTransition = .5;
+	let winConditionFade = 1;
+	let itemsExitingRack = [];
+
+	let items1 = [];
+	
+	$: isMobile = screenWidth < 480;
+	let isCartOpen = false;
 
 	//toggle cart in and out
 	function toggleCart() {
-		if (gameNumber == 2) {
-			if (cartVisible == "-92vw") {
-				cartVisible = "-102vw";
-				cartVisibleColor = midGray;
-			} else {
-				cartVisible = "-92vw";
-				cartVisibleColor = darkGray;
-			}
+	if (gameNumber == 2) {
+		const openCartOffset = isMobile ? "-50vw" : "-92vw";
+		const closedCartOffset = "-102vw";
+
+		if (cartVisible === openCartOffset) {
+			cartVisible = closedCartOffset;
+			cartVisibleColor = midGray;
+		} else {
+			cartVisible = openCartOffset;
+			cartVisibleColor = darkGray;
+			isCartOpen = true;
+
+			// Step 1: Mark rack and grid items to bounce out
+			items1 = items1.map(item => ({ ...item, bounceOut: true }));
+			itemsStart[gameNumber] = itemsStart[gameNumber].map(item => ({ ...item, bounceOut: true }));
+
+			// Step 2: Wait for bounce-out, then move to cart
+			setTimeout(() => {
+				// Move all into cart with bounceIn
+				const seen = new Set();
+				itemsCart = [...items1, ...itemsStart[gameNumber]].filter(item => {
+					if (seen.has(item.word)) return false;
+					seen.add(item.word);
+					return true;
+				}).map(item => ({ ...item, bounceOut: false, shouldBounce: true }));
+
+				// Clear rack and grid
+				items1 = [];
+				itemsStart[gameNumber] = [];
+			}, 600);
 		}
 	}
+}
+
+
+
 
 	//index of word tiles
 	let idx = 0;
@@ -92,7 +127,10 @@
 	//win condition function
 	function checkOut() {
 		if (itemsCart.length == 4) {
-			endTransition = 0; // dissapear
+			endTransition = 1;
+			setTimeout(() => {
+				winConditionFade = 0;
+			}, 500);
 			setTimeout(() => {
 				cartVisible = "0";
 			}, 1000);
@@ -138,10 +176,10 @@
 		style="right: {cartVisible}; opacity:{cartOpacity.current}; height: {cartHeight.current +
 			'px'}; width: {cartWidth.current + 'px'}; {cartCenter}"
 	>
-		<div class="cart-separator" style="opacity: {endTransition}"></div>
+		<div class="cart-separator" style="opacity: {winConditionFade}"></div>
 		<div
 			class="cart-dropbox"
-			style="opacity: {endTransition}"
+			style="opacity: {winConditionFade}"
 			use:dndzone={{
 				items: itemsCart,
 				flipDurationMs,
@@ -152,12 +190,15 @@
 			on:finalize={handleDndCart}
 		>
 			{#each itemsCart as tile (tile.id)}
-				<Tile word={tile.word} />
+			<Tile word={tile.word} shouldBounce={tile.shouldBounce} />
 			{/each}
 		</div>
 	</div>
-	<div class="page-contents" style="opacity: {endTransition}">
-		<div class="header-container">
+	{#if isCartOpen}
+		<div class="overlay" style="opacity: {endTransition}"></div>
+	{/if}
+	<div class="page-contents">
+		<div class="header-container" style="opacity: {winConditionFade}">
 			<div class="logo">*</div>
 			<div class="buttons" style="margin-right:{cartVisibleMargin}">
 				<div on:click={toggleMoreGamesModal}>MORE GAMES</div>
@@ -182,14 +223,14 @@
 		</div>
 
 		<div class="main-content">
-			<DragAndDrop bind:glowCart itemsStart={itemsStart[gameNumber]} bind:gameNumber />
+			<DragAndDrop bind:glowCart itemsStart={itemsStart[gameNumber]} bind:gameNumber bind:items1 />
 		</div>
 
-		<div class="footer">
+		<div class="footer" style="opacity: {winConditionFade}">
 			<div class="separator"></div>
 			<div class="footer-text">
 				<div>
-					© 2025 HANGONTOEVERYWORD.com. All Rights Reserved.
+					© 2025 HANGONTOEVERYWORD.com.
 				</div>
 				<div
 				class="checkout {checkoutGlow ? 'glow' : ''}"
@@ -250,6 +291,8 @@
   @media (max-width: 480px) {
     .page-container-1 {
       font-size: small;
+		padding-left: 6px;
+		padding-right: 6px;
     }
   }
 
@@ -267,13 +310,33 @@
 		justify-content: center;
 		align-items: center;
 	}
+	
 	.footer {
 		margin: auto;
 		width: 98vw;
 		z-index: 2;
 		position: relative;
 		margin-bottom: 0.5em;
+		transition: opacity .8s ease-in-out;
 	}
+	@media (max-width: 480px) {
+		.footer {
+		padding-left: 6px;
+		padding-right: 6px;
+    }
+  }
+  .overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100dvh;
+	background-color: var(--dark-gray);
+	opacity: 0.5;
+	z-index: -1; /* between .cart (10) and .page-contents (5) */
+	pointer-events: none;
+	transition: opacity .5s ease-in-out;
+}
 
 	.separator {
 		height: 0.5px;
@@ -323,6 +386,7 @@
 		pointer-events: auto;
 		z-index: 2;
 		position: relative;
+		transition: opacity .8s ease-in-out;
 	}
 	.logo {
 		font-size: 3em;
@@ -369,7 +433,7 @@
 	top: 0;
 	left: 0;
 	width: 100vw;
-	height: 100vh;
+	height: 100dvh;
 	background: rgba(0, 0, 0, 0.5);
 	display: flex;
 	align-items: center;

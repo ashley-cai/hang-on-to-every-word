@@ -5,6 +5,9 @@
   export let correct = "";
   export let shouldBounce = false;
   export let index = 0; // index for delay
+    export let hidden = false;
+    export let bounceOut = false;
+
   let tileOpacity;
 
   let applyBounce = false;
@@ -30,8 +33,8 @@
     }
   });
 
-  let darkGray = "#2F2F2F";
-  let midGray = "#9A9A9A";
+  let darkGray = "#1c1c1c";
+  let midGray = "#8e8d8c";
   let lightGray = "#e6e6e6";
   let errorRed = "#880000";
   let correctGreen = "#E8FFB7";
@@ -39,8 +42,15 @@
 
 
 <div
-  class="square {correct} {applyBounce ? 'bounce-in' : ''}"
-  style="--dark-gray: {darkGray}; --mid-gray: {midGray}; --light-gray: {lightGray}; --correct-green: {correctGreen}; opacity:{tileOpacity}"
+class="square {correct} {applyBounce ? 'bounce-in' : ''} {bounceOut ? 'bounce-out' : ''}"
+style="
+    --dark-gray: {darkGray};
+    --mid-gray: {midGray};
+    --light-gray: {lightGray};
+    --correct-green: {correctGreen};
+    opacity: {tileOpacity};
+    visibility: {hidden ? 'hidden' : 'visible'};
+  "
 >
   <div class="letter no-select">
     {word.toUpperCase()}
@@ -67,6 +77,12 @@
       box-shadow 1s ease-in-out,
       opacity 1s 1s ease-in-out;
   }
+  @media (max-width: 480px) {
+    .square {
+    padding-left: .75em;
+    padding-right: .75em;
+		}
+	}
 
   .square:active{
     outline: none;
@@ -133,4 +149,7 @@
   .bounce-in {
     animation: bounceIn 0.6s ease forwards;
   }
+  .bounce-out {
+  animation: bounceOut 0.6s ease forwards;
+}
 </style>

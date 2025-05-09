@@ -13,8 +13,8 @@
     let transitionHeight = 0;
     let transitionWidth = 0;
 
-    let darkGray = "#2F2F2F";
-    let midGray = "#9A9A9A";
+    let darkGray = "#1c1c1c";
+    let midGray = "#8e8d8c";
     let lightGray = "#e6e6e6";
     let errorRed = "#880000";
     let correctGreen = "#E8FFB7";
@@ -46,16 +46,16 @@
         font-family: "ArialNarrow";
         font-style: normal;
         font-weight: 300;
-        src: url("./fonts/arialnarrow.ttf"); /* IE9 Compat Modes */
+        src: url("/fonts/arialnarrow.ttf"); /* IE9 Compat Modes */
     }
 @font-face {
         font-family: "ROMMONO";
         font-style: normal;
         font-weight: 400;
-        src: url("./fonts/ABCROMMono-Regular-Trial.otf"); /* IE9 Compat Modes */
+        src: url("/fonts/ABCROMMono-Regular-Trial.otf"); /* IE9 Compat Modes */
     }
     :global(html) {
-        background-color: #2F2F2F;
+        background-color: #111111;
         font-family: Helvetica, sans-serif;
         font-size: 12px;
     }

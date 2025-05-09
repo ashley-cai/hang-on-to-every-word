@@ -8,15 +8,19 @@
 	import { Tween } from "svelte/motion";
 	import { fade } from "svelte/transition";
 	import { cubicInOut, cubicOut } from "svelte/easing";
+	import { SHADOW_ITEM_MARKER_PROPERTY_NAME } from 'svelte-dnd-action';
 
 	export let itemsStart = [];
 	export let gameNumber = 0;
+	export let items1 = []; //items for the rack
+
 	let ready = false;
 
-	let darkGray = "#2F2F2F";
-	let midGray = "#9A9A9A";
+	let darkGray = "#1c1c1c";
+	let midGray = "#8e8d8c";
 	let lightGray = "#e6e6e6";
 	let errorRed = "#880000";
+	
 
 	const gameContainerHeight = new Tween(500, {
 		duration: 500,
@@ -61,8 +65,6 @@
 	let correct_class = "";
 	let slotOpacity = 1;
 
-	let items1 = []; //items for the rack
-
 	let isRunning = false;
 	let animateHint = false;
 	let closeHint = false;
@@ -70,7 +72,7 @@
 	function typeWriter(textID, newText, speed = 100) {
 		let element = document.getElementById(textID);
 		let typeDelay = 0;
-		if (textID === "hint" && animateHint === false) {
+		if (textID === "hint" && animateHint === true) {
 			closeHint = false;
 			setTimeout(() => {
 				animateHint = true;
@@ -262,11 +264,15 @@
 		}, 500);
 
 		window.addEventListener("mouseup", checkConditions);
+		window.addEventListener("touchend", checkConditions);
+
 
 		return () => {
 			window.removeEventListener("mouseup", checkConditions);
+			window.removeEventListener("touchend", checkConditions);
 		};
 	});
+	
 </script>
 
 {#if ready}
@@ -318,7 +324,7 @@
 			top: {(gameContainerHeight.target * square.y) / 100}px;
 		  "
 				>
-					<Slot disableDrag={true} items={[square]} index={i} />
+					<Slot disableDrag={true} items={[square]} index={i} bounceOut={square.bounceOut} />
 				</div>
 			{/each}
 		</div>
@@ -334,16 +340,14 @@
 			on:consider={handleDnd}
 			on:finalize={handleDnd}
 		>
-			{#each items1 as item, i (item.id)}
-				<div
-					class="tile-container"
-					animate:flip={{ duration: flipDurationMs }}
-				>
-					<div style="z-index: 1; position: relative;">
-						<Tile correct={correct_class} word={item.word} />
-					</div>
-				</div>
-			{/each}
+		{#each items1 as item, i (item.id)}
+		<div class="tile-container" animate:flip={{ duration: flipDurationMs }}>
+		  <div style="z-index: 1; position: relative; opacity: {item[SHADOW_ITEM_MARKER_PROPERTY_NAME] ? 0 : 1};">
+			<Tile correct={correct_class} word={item.word} bounceOut={item.bounceOut} />
+		  </div>
+		</div>
+	  {/each}
+	  
 		</div>
 		<div class="level-complete"></div>
 	</div>
@@ -545,6 +549,11 @@
 
 	.rack > * {
 		margin: 6px;
+	}
+	@media (max-width: 480px) {
+		.rack > * {
+		margin: 3px;
+	}
 	}
 
 	.tile-container {

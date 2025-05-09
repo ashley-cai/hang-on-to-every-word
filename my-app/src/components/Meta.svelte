@@ -1,7 +1,7 @@
 <script lang="ts">
-	export let title = "Title TK";
-	export let description = "Description TK";
-	export let url = "https://ashleycai.com";
+	export let title = "Hang On To Every Word";
+	export let description = "Ashley Cai RISD Degree Project";
+	export let url = "https://hangontoeveryword.com";
 	export let keywords = "";
 	export let preloadFont: string[] = [];
 </script>

@@ -4,8 +4,8 @@
   import { Tween } from "svelte/motion";
   import { cubicInOut, cubicOut } from "svelte/easing";
 
-  let darkGray = "#2F2F2F";
-  let midGray = "#9A9A9A";
+  let darkGray = "#1c1c1c";
+  let midGray = "#8e8d8c";
   let lightGray = "#e6e6e6";
   let errorRed = "#880000";
 
