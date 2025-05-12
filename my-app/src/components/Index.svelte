@@ -9,7 +9,7 @@
     import Map from "./Map.svelte";
     import FinalGame from "./FinalGame.svelte";
 
-    let gameCounter = 0;
+    let gameCounter = 2;
     let transitionHeight = 0;
     let transitionWidth = 0;
 

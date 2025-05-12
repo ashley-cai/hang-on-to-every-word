@@ -593,7 +593,7 @@
 <style>
   .page-container-2 {
     width: 100vw;
-    height: 100vh;
+    height: 100dvh;
     position: absolute;
     display: none;
     justify-content: center;
@@ -698,6 +698,7 @@
   .tooltip-container {
     position: relative;
     display: inline-block;
+    transition: opacity 1s ease-in-out; /* Animation duration and effect */
   }
 
   .tooltip-text {
@@ -720,6 +721,11 @@
     max-width: calc(100vw - 20px);
     box-sizing: border-box;
   }
+  @media (max-width: 480px) {
+		.tooltip-text  {
+			display: none;
+		}
+	}
 
   .tooltip-container:hover .tooltip-text {
     visibility: visible;

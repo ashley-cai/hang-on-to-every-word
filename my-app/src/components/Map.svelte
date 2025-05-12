@@ -170,13 +170,8 @@
           setTimeout(() => {
             const pegmen = document.querySelectorAll(".pegman");
             pegmen.forEach((pegman) => {
-              pegman.style.transition = "opacity 0.5s linear";
-              pegman.style.opacity = "0"; // Fade out first
-
               setTimeout(() => {
                 pegman.classList.add("correct"); // Add correct class when faded out
-                pegman.style.backgroundImage = "var(--pegman-correct)";
-                pegman.style.opacity = "1"; // Fade back in
               }, 0); // wait for fade-out to complete
             });
           }, 0);
@@ -312,46 +307,77 @@
             }
           };
 
-          pegman.addEventListener("mousedown", onMouseDown);
-          document.addEventListener("mousemove", onMouseMove);
-          document.addEventListener("mouseup", onMouseUp);
+// Mouse events
+pegman.addEventListener("mousedown", onMouseDown);
+document.addEventListener("mousemove", onMouseMove);
+document.addEventListener("mouseup", onMouseUp);
+
+// Touch events
+pegman.addEventListener("touchstart", (e) => {
+  const touch = e.touches[0];
+  onMouseDown({ clientX: touch.clientX, clientY: touch.clientY });
+});
+document.addEventListener("touchmove", (e) => {
+    const touch = e.touches[0];
+    onMouseMove({ clientX: touch.clientX, clientY: touch.clientY });
+    e.preventDefault(); // prevent scrolling while dragging
+  
+}, { passive: false }); // required to allow preventDefault
+
+document.addEventListener("touchend", onMouseUp);
+
         });
       });
     }
   });
 
+  
   let isRunning = false;
-  function typeWriter(textID, newText, speed = 100) {
-    let element = document.getElementById(textID);
-    return new Promise((resolve) => {
-      let currentText = element.innerHTML;
-      let i = currentText.length;
-      let j = 0;
+  let animateHint = false;
+	let closeHint = false;
+	let transitioningGames = false;
 
-      function deleteText() {
-        if (i > 0) {
-          element.innerHTML = currentText.substring(0, i - 1);
-          i--;
-          setTimeout(deleteText, speed);
-        } else {
-          typeText();
-        }
-      }
+	function typeWriter(textID, newText, speed = 100) {
+		let element = document.getElementById(textID);
+		let typeDelay = 0;
+		if (textID === "hint" && transitioningGames === false) {
+			setTimeout(() => {
+				animateHint = true;
+			}, 10);
+			typeDelay = 1000;
+		}
 
-      function typeText() {
-        if (j < newText.length) {
-          element.innerHTML += newText.charAt(j);
-          j++;
-          setTimeout(typeText, speed);
-        } else {
-          isRunning = false;
-          resolve(); // done!
-        }
-      }
+		setTimeout(() => {
+			return new Promise((resolve) => {
+				let currentText = element.innerHTML;
+				let i = currentText.length;
+				let j = 0;
 
-      deleteText();
-    });
-  }
+				function deleteText() {
+					if (i > 0) {
+						element.innerHTML = currentText.substring(0, i - 1);
+						i--;
+						setTimeout(deleteText, speed);
+					} else {
+						typeText();
+					}
+				}
+
+				function typeText() {
+					if (j < newText.length) {
+						element.innerHTML += newText.charAt(j);
+						j++;
+						setTimeout(typeText, speed);
+					} else {
+						isRunning = false;
+						resolve(); // done!
+					}
+				}
+
+				deleteText();
+			});
+		}, typeDelay);
+	}
   let hintCount = 0;
   let hintsLeft = 3;
 
@@ -369,11 +395,11 @@
         isRunning = false;
       }, 5000);
     } else if (hintCount == 1) {
-      typeWriter("hint", "TRY MOVING THE WORDS IN AND OUT OF THE CIRCLE.");
+      typeWriter("hint", "TRY MOVING WORDS IN AND OUT.");
       hintsLeft = 1;
       hintCount++;
     } else if (hintCount == 2) {
-      typeWriter("hint", "HOW DO THEIR LABELS INTERACT WITH THEIR POSITIONS?");
+      typeWriter("hint", "LABEL + POSITION = ?");
       hintsLeft = 0;
       hintCount = 1;
     }
@@ -408,7 +434,10 @@
             <span class="tooltip-text">USE A HINT! I WON'T JUDGE YOU...</span>
           </div>
         </div>
-        <div id="hint"></div>
+        <div id="hint"
+        class:animate-hint={animateHint}
+        class:animate-hint-out={closeHint}
+        ></div>
         <div
           id="map"
           style="height: calc({gameHeight.target}px - 7em); width: calc({gameWidth.target}px - 6em);"
@@ -437,7 +466,8 @@
 <style>
   .page-container {
     width: 100vw;
-    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
     position: absolute;
     opacity: 1;
     display: none;
@@ -494,12 +524,13 @@
   }
 
   :root {
-    --pegman-initial: url("./pegman-initial.png");
-    --pegman-moving: url("./pegman-moving.png");
-    --pegman-correct: url("./pegman-correct.png");
+    --pegman-initial: url("/pegman-initial.png");
+    --pegman-moving: url("/pegman-moving.png");
+    --pegman-correct: url("/pegman-correct.png");
+  }
 
-    /* --pegman-initial: url("https://maps.gstatic.com/tactile/pegman_v3/santa/runway-2x.png");
-    --pegman-moving: url("https://maps.gstatic.com/tactile/pegman_v3/santa/dropping-2x.png"); */
+  :global(.correct) {
+    background-image: var(--pegman-correct) !important;
   }
 
   #map {
@@ -543,6 +574,11 @@
     opacity: 50%;
     user-select: none;
     transition: filter 2s ease-in-out;
+  }
+  @media(max-width: 480px) {
+    .pegman-shadow {
+      filter: blur(3px);
+    }
   }
 
   .pegman-container {
@@ -625,6 +661,7 @@
     justify-self: right;
     position: relative;
     display: inline-block;
+    transition: opacity 1s ease-in-out; /* Animation duration and effect */
   }
 
   .tooltip-text {
@@ -647,20 +684,58 @@
     max-width: calc(100vw - 20px);
     box-sizing: border-box;
   }
+  @media (max-width: 480px) {
+		.tooltip-text  {
+			display: none;
+		}
+	}
 
   .tooltip-container:hover .tooltip-text {
     visibility: visible;
     opacity: 1;
   }
 
-  #hint {
-    margin-left: auto;
-    width: 50%;
-    text-align: right;
-    height: 2em;
-    padding-bottom: 4vh;
-    font-weight: bold;
-    color: var(--error-red);
-    transition: opacity 1s ease-in-out; /* Animation duration and effect */
-  }
+	#hint {
+		background-color: var(--error-red);
+		width: 100%;
+		text-align: center;
+		align-self: center;
+		align-items: center;
+		margin-left: auto;
+		height: 1.5em;
+		line-height: 1.5em;
+    margin-bottom: 4vh;
+		font-weight: bold;
+		color: var(--light-gray);
+		transform: scaleX(0%);
+
+		transition: opacity 3s ease-in-out; /* Animation duration and effect */
+	}
+
+  @keyframes slideIn {
+		from {
+			transform: scaleX(0%);
+		}
+		to {
+			transform: scaleX(100%);
+		}
+	}
+
+	#hint.animate-hint {
+		animation: slideIn 0.5s ease-out forwards;
+	}
+
+	@keyframes slideOut {
+		from {
+			transform: scaleX(100%);
+		}
+		to {
+			transform: scaleX(0%);
+		}
+	}
+
+	#hint.animate-hint-out {
+		animation: slideOut 0.5s ease-out forwards;
+	}
+
 </style>

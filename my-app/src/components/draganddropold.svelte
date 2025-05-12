@@ -175,7 +175,7 @@
 
 	.page-container {
 		position: relative;
-		height: 100vh;
+		height: 100dvh;
 		overflow:hidden;
 		pointer-events: none;
 	}

@@ -794,7 +794,7 @@
 
   .page-container {
     width: 100vw;
-    height: 100vh;
+    height: 100dvh;
     position: absolute;
     opacity: 1;
     display: none;
@@ -845,6 +845,11 @@
     max-width: calc(100vw - 20px);
     box-sizing: border-box;
   }
+  @media (max-width: 480px) {
+		.tooltip-text  {
+			display: none;
+		}
+	}
 
   .tooltip-container:hover .tooltip-text {
     visibility: visible;

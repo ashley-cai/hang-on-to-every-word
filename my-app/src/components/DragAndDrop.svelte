@@ -68,16 +68,16 @@
 	let isRunning = false;
 	let animateHint = false;
 	let closeHint = false;
+	let transitioningGames = false;
 
 	function typeWriter(textID, newText, speed = 100) {
 		let element = document.getElementById(textID);
 		let typeDelay = 0;
-		if (textID === "hint" && animateHint === true) {
-			closeHint = false;
+		if (textID === "hint" && transitioningGames === false) {
 			setTimeout(() => {
 				animateHint = true;
 			}, 10);
-			typeDelay = 2000;
+			typeDelay = 1000;
 		}
 
 		setTimeout(() => {
@@ -148,6 +148,7 @@
 					slotOpacity = 0;
 					isUnderlined = false;
 					hintButtonOpacity = 0;
+					transitioningGames = true;
 					typeWriter("hint", "", 50);
 					setTimeout(() => {
 						if (animateHint === true) {
@@ -155,6 +156,7 @@
 						}
 						animateHint = false;
 					}, 3000);
+					transitioningGames = false;
 				}, 700);
 				setTimeout(() => {
 					items1 = [];
@@ -246,8 +248,11 @@
 	}
 
 	const flipDurationMs = 100;
+	let screenWidth = 0;
 
 	onMount(() => {
+		screenWidth = window.innerWidth;
+
 		if (typeof window !== "undefined") {
 			handleResize();
 			window.addEventListener("resize", handleResize);
@@ -480,6 +485,7 @@
 		width: 100%;
 		text-align: center;
 		align-self: center;
+		align-items: center;
 		margin-left: auto;
 		height: 1.5em;
 		line-height: 1.5em;
@@ -617,6 +623,11 @@
 		font-size: 0.75em;
 		max-width: calc(100vw - 20px);
 		box-sizing: border-box;
+	}
+	@media (max-width: 480px) {
+		.tooltip-text  {
+			display: none;
+		}
 	}
 
 	.tooltip-container:hover .tooltip-text {

@@ -17,17 +17,13 @@
   let rootContent = "";
   let rootCount = 0;
   let rootDenominator = 0;
+  let tappedWords = new Set(); // for mobile click-to-highlight
 
   let hintButtonOpacity = 0;
   let structuredData;
   export let gameCounter;
 
   let windowWidth = 0;
-
-  function setViewportHeight() {
-	const vh = window.innerHeight * 0.01;
-	document.documentElement.style.setProperty('--vh', `${vh}px`);
-}
 
   const gameContentOpacity = new Tween(0, {
     duration: 1000,
@@ -48,6 +44,12 @@
     easing: cubicInOut,
   });
 
+  const mobileRoots = new Tween(0, {
+    delay: 0,
+    duration: 1000,
+    easing: cubicInOut,
+  });
+
   function setGameDimensions(width) {
     if (width >= 1200) {
       // large screens
@@ -64,8 +66,11 @@
     } else {
       // mobile screens
       gameWidth.target = 320;
-      gameHeight.target = 600;
+      gameHeight.target = 450;
     }
+    setTimeout(() => {
+      mobileRoots.target = 100;
+    }, 5000);
     sidePanelWidth.target = 10;
   }
 
@@ -91,6 +96,26 @@
         return;
       }
 
+      if (isMobile) {
+        span.style.cursor = "pointer";
+        span.addEventListener("click", () => {
+          const cleaned = span.textContent.replace(/[^\w]/g, "").toLowerCase();
+
+          let cleanedCognates = findCognates(cleaned);
+          console.log(findCognates(cleaned));
+
+          if (tappedWords.has(cleanedCognates[1])) {
+            tappedWords.delete(cleanedCognates[1]);
+          } else {
+            tappedWords.add(cleanedCognates[1]);
+          }
+
+          console.log([].concat(...tappedWords));
+
+          highlightedContent = getHighlightedContent([].concat(...tappedWords));
+        });
+      }
+
       const randomX = Math.floor(Math.random() * 60 - 30); // -15px to 15px
       const randomY = Math.floor(Math.random() * 60 - 30); // -15px to 15px
 
@@ -107,9 +132,12 @@
       }, i * delay);
     });
   }
+  let isMobile = false;
+  let screenWidth = 0;
 
   onMount(() => {
-    setViewportHeight();
+    screenWidth = window.innerWidth;
+    isMobile = screenWidth < 480;
 
     if (gameCounter == 1) {
       setTimeout(() => {
@@ -122,12 +150,14 @@
         gameContentOpacity.target = 1;
 
         setTimeout(() => {
-          animateParagraphWordsRandom("highlighted-para", 'The gnome, capable and congenial, is alone in the immense hospice, impervious is the attenuation of agency. This innate fusion, this adult protagonist, added capacity. Essential is the essence of the command, the quintessential hospitality. There, this agnostic agent click, complete and agile, attended the hospitable agenda. The diagnosis is circumspect, the ignoble circumstance that demand attenuation. Capiche? The top gnome intend not abnegate the capacity of captivating, inciting hostility in the perfunctory agency of the industry. Circa the perennial diagnosis, the plebeian renegade performed the perfuse effusion of essence, the anagogical fusion of physiognomy and genealogy. The plebiscite inflict not confusion; the essence managed circumnavigating the perimeter of congenital antagonism. Adorned in the negligee of ignorance, the plebe manufactured the symmetry of the circumstance. Thereabout, that perfumed hostage diffused the hostility of effusive compliment. The perplexed gnome demanded cryogenic supply, piecemeal, capable of negotiating tender, refunds. The circumstance abated, agonized, confused the hospitality of the adult gnome, instantly. The protagonist atoned, permanently, presently. None ignored the circuit of the metronome, the circumference of isometric supply. Alone, not lonely, the left gnome is capable of the intrinsic introspect, that instant of perspective in the permanent interior. Invert the corner circumstance, yes, and the quintessential one of the introduction is increasingly impervious. Represent the gentile, the genteel, the gentry—yes, the gnome is indigenous of the genre.');
-          content = `'The gnome, capable and congenial, is alone in the immense hospice, impervious is the attenuation of agency. This innate fusion, this adult protagonist, added capacity. Essential is the essence of the command, the quintessential hospitality. There, this agnostic agent click, complete and agile, attended the hospitable agenda. The diagnosis is circumspect, the ignoble circumstance that demand attenuation. Capiche? The top gnome intend not abnegate the capacity of captivating, inciting hostility in the perfunctory agency of the industry. Circa the perennial diagnosis, the plebeian renegade performed the perfuse effusion of essence, the anagogical fusion of physiognomy and genealogy. The plebiscite inflict not confusion; the essence managed circumnavigating the perimeter of congenital antagonism. Adorned in the negligee of ignorance, the plebe manufactured the symmetry of the circumstance. Thereabout, that perfumed hostage diffused the hostility of effusive compliment. The perplexed gnome demanded cryogenic supply, piecemeal, capable of negotiating tender, refunds. The circumstance abated, agonized, confused the hospitality of the adult gnome, instantly. The protagonist atoned, permanently, presently. None ignored the circuit of the metronome, the circumference of isometric supply. Alone, not lonely, the left gnome is capable of the intrinsic introspect, that instant of perspective in the permanent interior. Invert the corner circumstance, yes, and the quintessential one of the introduction is increasingly impervious. Represent the gentile, the genteel, the gentry—yes, the gnome is indigenous of the genre.'`
+          animateParagraphWordsRandom(
+            "highlighted-para",
+            "The gnome, capable and congenial, is alone in the immense hospice, impervious is the attenuation of agency. This innate fusion, this adult protagonist, added capacity. Essential is the essence of the command, the quintessential hospitality. There, this agnostic agent click, complete and agile, attended the hospitable agenda. The diagnosis is circumspect, the ignoble circumstance that demand attenuation. Capiche? The top gnome intend not abnegate the capacity of captivating, inciting hostility in the perfunctory agency of the industry. Circa the perennial diagnosis, the plebeian renegade performed the perfuse effusion of essence, the anagogical fusion of physiognomy and genealogy. The plebiscite inflict not confusion; the essence managed circumnavigating the perimeter of congenital antagonism. Adorned in the negligee of ignorance, the plebe manufactured the symmetry of the circumstance. Thereabout, that perfumed hostage diffused the hostility of effusive compliment. The perplexed gnome demanded cryogenic supply, piecemeal, capable of negotiating tender, refunds. The circumstance abated, agonized, confused the hospitality of the adult gnome, instantly. The protagonist atoned, permanently, presently. None ignored the circuit of the metronome, the circumference of isometric supply. Alone, not lonely, the left gnome is capable of the intrinsic introspect, that instant of perspective in the permanent interior. Invert the corner circumstance, yes, and the quintessential one of the introduction is increasingly impervious. Represent the gentile, the genteel, the gentry. Yes, the gnome is indigenous of the genre.",
+          );
+          content = `The gnome, capable and congenial, is alone in the immense hospice, impervious is the attenuation of agency. This innate fusion, this adult protagonist, added capacity. Essential is the essence of the command, the quintessential hospitality. There, this agnostic agent click, complete and agile, attended the hospitable agenda. The diagnosis is circumspect, the ignoble circumstance that demand attenuation. Capiche? The top gnome intend not abnegate the capacity of captivating, inciting hostility in the perfunctory agency of the industry. Circa the perennial diagnosis, the plebeian renegade performed the perfuse effusion of essence, the anagogical fusion of physiognomy and genealogy. The plebiscite inflict not confusion; the essence managed circumnavigating the perimeter of congenital antagonism. Adorned in the negligee of ignorance, the plebe manufactured the symmetry of the circumstance. Thereabout, that perfumed hostage diffused the hostility of effusive compliment. The perplexed gnome demanded cryogenic supply, piecemeal, capable of negotiating tender, refunds. The circumstance abated, agonized, confused the hospitality of the adult gnome, instantly. The protagonist atoned, permanently, presently. None ignored the circuit of the metronome, the circumference of isometric supply. Alone, not lonely, the left gnome is capable of the intrinsic introspect, that instant of perspective in the permanent interior. Invert the corner circumstance, yes, and the quintessential one of the introduction is increasingly impervious. Represent the gentile, the genteel, the gentry—yes, the gnome is indigenous of the genre.`;
         }, 200);
         setTimeout(() => {
           typeWriter("game-title", "ETYMOLOGY");
-
         }, 400);
       }, 3500);
 
@@ -135,6 +165,7 @@
         hintButtonOpacity = 1;
       }, 20000);
     }
+
     if (typeof window !== "undefined") {
       handleResize(); // set initial size
       window.addEventListener("resize", handleResize);
@@ -172,22 +203,24 @@
       // Selection is outside the allowed area, so clear it
       selection.removeAllRanges();
     }
-    highlightedContent = getHighlightedContent(selection?.toString()); // Update the highlighted content
+    let wordsToHighlight = selection
+      ?.toString()
+      .replace(/[^\w\s]|_—/g, "")
+      .replace(/\s+/g, " ")
+      .split(" ")
+      .map((word) => word.trim())
+      .filter(Boolean);
+    highlightedContent = getHighlightedContent(wordsToHighlight); // Update the highlighted content
   }
 
   // Replace the content with highlighted text
-  function getHighlightedContent(selectedWords) {
+  function getHighlightedContent(wordsToHighlight) {
     // if (!selectedWords) {
     //   return content.replace(/<span class="highlighted">(.*?)<\/span>/gi, "$1");
     // }
 
     // Split the input string into individual words
-    let wordsToHighlight = selectedWords
-      .replace(/[^\w\s]|_/g, "")
-      .replace(/\s+/g, " ")
-      .split(" ")
-      .map((word) => word.trim())
-      .filter(Boolean);
+
     let allCognates = [];
     let allRoots = [];
 
@@ -205,35 +238,48 @@
     rootCount = uniqueRoots.length;
 
     uniqueRoots.forEach((root) => {
-      let def = structuredData.definition[root];
-      formatted =
-        formatted +
-        `<div class="root-def"><span class='bold-root'>${root.toUpperCase()}</span><br><span class='root-def-text'>${def.toUpperCase()}</span></div>`;
+      if (root != "") {
+        let def = structuredData.definition[root];
+        formatted =
+          formatted +
+          `<div class="root-def"><span class='bold-root'>${root.toUpperCase()}</span><br><span class='root-def-text'>${def.toUpperCase()}</span></div>`;
+      }
     });
 
     // roots
     rootContent = formatted;
 
+    const paraSpans = document.querySelectorAll("#highlighted-para span");
+
     // If no cognates were found, return original content
     if (allCognates.length === 0) {
-      return content.replace(/<span class="highlighted">(.*?)<\/span>/gi, "$1");
+      paraSpans.forEach((span) => {
+        span.classList.remove("highlighted");
+      });
     }
 
     // Create a regex pattern to match any of the cognates/keywords
     const regex = new RegExp(`\\b(${allCognates.join("|")})\\b`, "gi");
 
     // Highlight the matched words
-    return content
-      .replace(
-        selectedWords,
-        `<span class="highlighted">${selectedWords}</span>`,
-      )
-      .replace(regex, (match) => `<span class="highlighted">${match}</span>`);
+    paraSpans.forEach((span) => {
+      const cleaned = span.textContent.replace(/[^\w]/g, "").toLowerCase();
+      if (allCognates.includes(cleaned)) {
+        span.classList.add("highlighted");
+      }
+    });
+    // return content
+    //   .replace(
+    //     selectedWords,
+    //     `<span class="highlighted">${selectedWords}</span>`,
+    //   )
+    //   .replace(regex, (match) => `<span class="highlighted">${match}</span>`);
   }
 
   function winCondition() {
     setTimeout(() => {
       gameContentOpacity.target = 0;
+      mobileRoots.target = 0;
     }, 0);
     setTimeout(() => {
       transitionHeight = gameHeight.target;
@@ -250,41 +296,55 @@
         return [key, structuredData.words[key]]; // Return the key and all matching words
       }
     }
-    return []; // Return an empty array if no cognates are found
+    return ["", [word]];
   }
 
   let isRunning = false;
-  function typeWriter(textID, newText, speed = 100) {
-    let element = document.getElementById(textID);
-    return new Promise((resolve) => {
-      let currentText = element.innerHTML;
-      let i = currentText.length;
-      let j = 0;
+  let animateHint = false;
+	let closeHint = false;
+	let transitioningGames = false;
 
-      function deleteText() {
-        if (i > 0) {
-          element.innerHTML = currentText.substring(0, i - 1);
-          i--;
-          setTimeout(deleteText, speed);
-        } else {
-          typeText();
-        }
-      }
+	function typeWriter(textID, newText, speed = 100) {
+		let element = document.getElementById(textID);
+		let typeDelay = 0;
+		if (textID === "hint" && transitioningGames === false) {
+			setTimeout(() => {
+				animateHint = true;
+			}, 10);
+			typeDelay = 1000;
+		}
 
-      function typeText() {
-        if (j < newText.length) {
-          element.innerHTML += newText.charAt(j);
-          j++;
-          setTimeout(typeText, speed);
-        } else {
-          isRunning = false;
-          resolve(); // done!
-        }
-      }
+		setTimeout(() => {
+			return new Promise((resolve) => {
+				let currentText = element.innerHTML;
+				let i = currentText.length;
+				let j = 0;
 
-      deleteText();
-    });
-  }
+				function deleteText() {
+					if (i > 0) {
+						element.innerHTML = currentText.substring(0, i - 1);
+						i--;
+						setTimeout(deleteText, speed);
+					} else {
+						typeText();
+					}
+				}
+
+				function typeText() {
+					if (j < newText.length) {
+						element.innerHTML += newText.charAt(j);
+						j++;
+						setTimeout(typeText, speed);
+					} else {
+						isRunning = false;
+						resolve(); // done!
+					}
+				}
+
+				deleteText();
+			});
+		}, typeDelay);
+	}
   let hintCount = 0;
   let hintsLeft = 2;
 
@@ -296,10 +356,7 @@
       hintsLeft = 1;
       hintCount++;
     } else if (hintCount == 1) {
-      typeWriter(
-        "hint",
-        "IS THERE A MESSAGE IN THE UNHIGHLIGHTED WORDS?",
-      );
+      typeWriter("hint", "READ THE UNHIGHLIGHTED WORDS.");
       hintsLeft = 0;
       hintCount = 0;
     }
@@ -341,14 +398,10 @@
             <span class="tooltip-text">Use a hint! I won't judge you...</span>
           </div>
         </div>
-        <div id="hint"></div>
+        <div id="hint" 			class:animate-hint={animateHint}
+        class:animate-hint-out={closeHint}></div>
 
         <div contenteditable="false">
-          <p>
-            {#if selectedText}
-              <strong>Highlighted word: {selectedText}</strong>
-            {/if}
-          </p>
           <p
             id="highlighted-para"
             on:mouseup={highlightSelectedText}
@@ -362,7 +415,7 @@
       class="roots"
       bind:innerHTML={rootContent}
       contenteditable="false"
-      style="opacity:{gameContentOpacity.current}; width: {sidePanelWidth}vw"
+      style="opacity:{gameContentOpacity.current}; width: {sidePanelWidth.current}vw; height: {mobileRoots.current}px"
     ></div>
   </div>
 </div>
@@ -398,14 +451,20 @@
   .page-container-1 {
     display: flex;
     width: 100vw;
-    height: calc(var(--vh, 1vh) * 100);
+    height: 100dvh;
     position: absolute;
     opacity: 1;
     justify-content: center;
+    overflow: hidden;
   }
 
   #highlighted-para {
     color: var(--dark-gray);
+  }
+  @media (max-width: 480px) {
+    #highlighted-para {
+      font-size: 10px;
+    }
   }
 
   .win-condition {
@@ -420,19 +479,42 @@
     display: grid;
     grid-template-columns: 1fr auto 1fr; /* Center column auto-sized */
     gap: 20px; /* Adjust spacing as needed */
+    margin: auto;
+  }
+  @media (max-width: 480px) {
+    .game-words-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25em;
+      padding: 1em;
+    }
+
+    .game-container-1 {
+      order: 1;
+    }
   }
 
   .roots {
     align-self: center;
-    max-height: 70vh;
+    /* max-height: 70vh; */
     color: var(--mid-gray);
-    font-size: small;
     display: flex;
     flex-direction: column;
     flex-wrap: wrap;
     user-select: none;
-    font-family: 'ROMMONO';
+    font-family: "ROMMONO";
     font-size: 10px;
+  }
+  @media (max-width: 480px) {
+    .roots {
+      width: 100% !important;
+      /* height: 100px; */
+      order: 2; /* just in case */
+      text-align: left;
+      padding-top: 0;
+      font-size: 8px;
+    }
   }
 
   :global(.root-def) {
@@ -447,11 +529,8 @@
   .game-container-1 {
     flex-direction: column;
     align-items: center;
-    width: 40vw;
-    height: 80vh;
     background-color: var(--mid-gray);
     border-radius: 0.75em;
-    margin: auto;
     padding: 3em;
   }
   @media (max-width: 480px) {
@@ -475,15 +554,15 @@
   }
 
   .header-container {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  position: relative;
-}
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    position: relative;
+  }
 
-#game-title {
-  justify-self: start;
-}
+  #game-title {
+    justify-self: start;
+  }
 
   .hint-button {
     color: var(--dark-gray);
@@ -508,6 +587,7 @@
     justify-self: end;
     position: relative;
     display: inline-block;
+    transition: opacity 1s ease-in-out; /* Animation duration and effect */
   }
 
   .tooltip-text {
@@ -530,26 +610,64 @@
     max-width: calc(100vw - 20px);
     box-sizing: border-box;
   }
+  @media (max-width: 480px) {
+		.tooltip-text  {
+			display: none;
+		}
+	}
 
   .tooltip-container:hover .tooltip-text {
     visibility: visible;
     opacity: 1;
   }
 
-  #hint {
-    padding-top: .5em;
-    margin-left: auto;
-    width: 70%;
-    height: 3.5em;
-    text-align: right;
-    font-weight: bold;
-    color: var(--error-red);
-    transition: opacity 1s ease-in-out; /* Animation duration and effect */
-  }
+	#hint {
+		background-color: var(--error-red);
+		width: 100%;
+		text-align: center;
+		align-self: center;
+		align-items: center;
+		margin-left: auto;
+		height: 1.5em;
+		line-height: 1.5em;
+    margin-bottom: 1em;
+		font-weight: bold;
+		color: var(--light-gray);
+		transform: scaleX(0%);
+
+		transition: opacity 3s ease-in-out; /* Animation duration and effect */
+	}
   /* @media (max-width: 480px) {
     #hint {
       height: 1em;
       padding-bottom: 1em;
     }
   } */
+
+  @keyframes slideIn {
+		from {
+			transform: scaleX(0%);
+		}
+		to {
+			transform: scaleX(100%);
+		}
+	}
+
+	#hint.animate-hint {
+		animation: slideIn 0.5s ease-out forwards;
+	}
+
+	@keyframes slideOut {
+		from {
+			transform: scaleX(100%);
+		}
+		to {
+			transform: scaleX(0%);
+		}
+	}
+
+	#hint.animate-hint-out {
+		animation: slideOut 0.5s ease-out forwards;
+	}
+
 </style>

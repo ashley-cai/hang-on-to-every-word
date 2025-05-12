@@ -324,7 +324,7 @@
 <style>
 	.page-container {
 		width: 100vw;
-		height: 100vh;
+		height: 100dvh;
 		position: absolute;
 		opacity: 1;
 		width: 100vw;
@@ -338,7 +338,7 @@
 		top: 0;
 		left: 0;
 		width: 100vw;
-		height: 100vh;
+		height: 100dvh;
 		margin: 0;
 		border: none;
 		overflow: hidden;
