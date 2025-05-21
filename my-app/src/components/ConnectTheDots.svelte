@@ -17,6 +17,9 @@
   let appearIndex = 0;
   let dotsReady = false;
   let disappearIndex = null;
+  let originalSVGWidth = 1300;
+  let originalSVGHeight = 1477;
+
 
   let hoveredDot = { setIndex: null, dotIndex: null };
   let hintOpacity = 0;
@@ -28,6 +31,10 @@
     delay: 500,
     duration: 500,
     easing: cubicInOut,
+  });
+  const gameContentOpacity = new Tween(1, {
+    duration: 500,
+    easing: cubicOut,
   });
 
   function setGameDimensions(width) {
@@ -45,7 +52,7 @@
       gameContainerWidth.target = 480;
     } else {
       // mobile screens
-      gameContainerHeight.target = 600;
+      gameContainerHeight.target = 400;
       gameContainerWidth.target = 350;
     }
   }
@@ -53,6 +60,9 @@
 
   function handleResize() {
     windowWidth = window.innerWidth;
+    dotSets = windowWidth < 480 ? dotSets.slice(0, 3) : dotSets;
+    originalSVGWidth = windowWidth < 480 ? 1400: 1300;
+    originalSVGHeight = windowWidth < 480 ? 1200: 1477;
     setGameDimensions(windowWidth);
   }
 
@@ -60,170 +70,118 @@
   $: allCompleted = dotSets.every((set) => set.currentStep === set.dots.length);
 
   let dotSets = [
-    {
-      id: 1,
-      color: lightGray,
-      dots: [
-        { x: 423, y: 999, label: "UNDER" },
-        { x: 581, y: 830, label: "YOUR" },
-        { x: 727, y: 726, label: "THUMB" },
-      ],
-      currentStep: 0,
-      lines: [],
-    },
-    {
-      id: 2,
-      color: lightGray,
-      dots: [
-        { x: 727, y: 726, label: "THUMB" },
-        { x: 908, y: 677, label: "HIS" },
-        { x: 908, y: 878, label: "NOSE" },
-        { x: 1170, y: 499, label: "AT" },
-      ],
-      currentStep: 0,
-      lines: [],
-    },
-    {
-      id: 3,
-      color: lightGray,
-      dots: [
-        { x: 1170, y: 499, label: "AT" },
-        { x: 908, y: 150, label: "THE" },
-        { x: 908, y: 358, label: "END" },
-        { x: 703, y: 422, label: "OF" },
-        { x: 529, y: 547, label: "MY" },
-        { x: 407, y: 885, label: "ROPE" },
-      ],
-      currentStep: 0,
-      lines: [],
-    },
-    {
-      id: 4,
-      color: lightGray,
-      dots: [
-        { x: 719, y: 300, label: "SHAPE" },
-        { x: 629, y: 396, label: "UP" },
-        { x: 411, y: 396, label: "OR" },
-        { x: 355, y: 434, label: "SHIP" },
-        { x: 269, y: 576, label: "OUT" },
-      ],
-      currentStep: 0,
-      lines: [],
-    },
-    {
-      id: 5,
-      color: lightGray,
-      dots: [
-        { x: 252, y: 314, label: "ALL" },
-        { x: 355, y: 229, label: "BENT" },
-        { x: 719, y: 229, label: "OUT" },
-        { x: 771, y: 267, label: "OF" },
-        { x: 719, y: 300, label: "SHAPE" },
-      ],
-      currentStep: 0,
-      lines: [],
-    },
-    {
-      id: 6,
-      color: lightGray,
-      dots: [
-        { x: 407, y: 1133, label: "LET" },
-        { x: 316, y: 1063, label: "THE" },
-        { x: 269, y: 976, label: "CAT" },
-        { x: 269, y: 576, label: "OUT" },
-        { x: 269, y: 430, label: "OF" },
-        { x: 388, y: 292, label: "THE" },
-        { x: 595, y: 292, label: "BAG" },
-      ],
-      currentStep: 0,
-      lines: [],
-    },
-    {
-      id: 7,
-      color: lightGray,
-      dots: [
-        { x: 252, y: 314, label: "ALL" },
-        { x: 124, y: 482, label: "TALK" },
-        { x: 124, y: 1035, label: "AND" },
-        { x: 189, y: 1186, label: "NO" },
-        { x: 346, y: 1314, label: "ACTION" },
-      ],
-      currentStep: 0,
-      lines: [],
-    },
-    {
-      id: 8,
-      color: lightGray,
-      dots: [
-        // { x: 381, y: 1204, label: 'IF' },
-        { x: 1175, y: 910, label: "IF" },
-        { x: 1175, y: 1020, label: "YOU" },
-        { x: 1005, y: 1204, label: "HAVE" },
-        { x: 906, y: 1204, label: "NOTHING" },
-        { x: 792, y: 1204, label: "NICE" },
-        { x: 665, y: 1204, label: "TO" },
-        { x: 551, y: 1204, label: "SAY" },
-        { x: 381, y: 1204, label: "DONT" },
-        { x: 263, y: 1125, label: "SAY" },
-        { x: 203, y: 1007, label: "ANYTHING" },
-        { x: 203, y: 430, label: "AT" },
-        { x: 252, y: 314, label: "ALL" },
-      ],
-      currentStep: 0,
-      lines: [],
-    },
-    {
-      id: 9,
-      color: lightGray,
-      dots: [
-        { x: 381, y: 1204, label: "DONT" },
-        { x: 407, y: 1133, label: "LET" },
-        { x: 845, y: 1133, label: "THE" },
-        { x: 984, y: 1133, label: "BED" },
-        { x: 1074, y: 1083, label: "BUGS" },
-        { x: 1118, y: 1012, label: "BITE" },
-      ],
-      currentStep: 0,
-      lines: [],
-    },
-    {
-      id: 10,
-      color: lightGray,
-      dots: [
-        { x: 1118, y: 1012, label: "BITE" },
-        { x: 1118, y: 799, label: "OFF" },
-        { x: 1152, y: 730, label: "MORE" },
-        { x: 1175, y: 799, label: "THAN" },
-        { x: 1175, y: 1020, label: "YOU" },
-        { x: 1118, y: 1125, label: "CAN" },
-        { x: 990, y: 1273, label: "CHEW" },
-      ],
-      currentStep: 0,
-      lines: [],
-    },
-    {
-      id: 11,
-      color: lightGray,
-      dots: [
-        { x: 1118, y: 1125, label: "CAN" },
-        { x: 927, y: 1321, label: "OF" },
-        { x: 468, y: 1321, label: "WORMS" },
-      ],
-      currentStep: 0,
-      lines: [],
-    },
-    {
-      id: 12,
-      color: lightGray,
-      dots: [
-        { x: 1118, y: 799, label: "OFF" },
-        { x: 845, y: 1133, label: "THE" },
-        { x: 680, y: 1321, label: "CUFF" },
-      ],
-      currentStep: 0,
-      lines: [],
-    },
-  ];
+  {
+    id: 1,
+    color: "#34CF49",
+    dots: [
+      { x: 295, y: 938, label: "UNDER" },
+      { x: 453, y: 769, label: "YOUR" },
+      { x: 599, y: 665, label: "THUMB" },
+    ],
+    currentStep: 0,
+    lines: [],
+  },
+  {
+    id: 2,
+    color: "#815322",
+    dots: [
+      { x: 599, y: 665, label: "THUMB" },
+      { x: 780, y: 616, label: "HIS" },
+      { x: 780, y: 817, label: "NOSE" },
+      { x: 1100, y: 438 , label: "AT"},
+    ],
+    currentStep: 0,
+    lines: [],
+  },
+  {
+    id: 3,
+    color: "#7323F4",
+    dots: [
+      { x: 1100, y: 438, label: "AT" },
+      { x: 780, y: 77, label: "THE" },
+      { x: 780, y: 297, label: "END" },
+      { x: 575, y: 361, label: "OF" },
+      { x: 401, y: 486, label: "MY" },
+      { x: 279, y: 824, label: "ROPE" },
+    ],
+    currentStep: 0,
+    lines: [],
+  },
+  {
+    id: 4,
+    color: "#F0484E",
+    dots: [
+      { x: 124, y: 253, label: "ALL" },
+      { x: 227, y: 168, label: "BENT" },
+      { x: 591, y: 168, label: "OUT" },
+      { x: 643, y: 206, label: "OF" },
+      { x: 591, y: 239, label: "SHAPE"},
+    ],
+    currentStep: 0,
+    lines: [],
+  },
+  {
+    id: 5,
+    color: "#C948F0",
+    dots: [
+      { x: 591, y: 239, label: "SHAPE" },
+      { x: 260, y: 239, label: "UP" },
+      { x: 141, y: 369, label: "OR" },
+      { x: 141, y: 915, label: "SHIP" },
+      { x: 279, y: 1072, label: "OUT" },
+    ],
+    currentStep: 0,
+    lines: [],
+  },
+  {
+    id: 7,
+    color: "#71A388",
+    dots: [
+      { x: 135, y: 1064, label: "ONE" },
+      { x: 75, y: 946, label: "SIZE" },
+      { x: 75, y: 369, label: "FITS" },
+      { x: 124, y: 253, label: "ALL" },
+    ],
+    currentStep: 0,
+    lines: [],
+  },
+  {
+    id: 8,
+    color: "#FFAE3E",
+    dots: [
+      { x: 279, y: 1072, label: "OUT" },
+      { x: 849, y: 1072, label: "OF" },
+      { x: 991, y: 942, label: "THE" },
+      { x: 991, y: 739, label: "BLUE" },
+    ],
+    currentStep: 0,
+    lines: [],
+  },
+  {
+    id: 9,
+    color: "#3E4AFF",
+    dots: [
+      { x: 991, y: 739, label: "BLUE" },
+      { x: 1027, y: 692, label: "IN" },
+      { x: 1064, y: 739, label: "THE" },
+      { x: 1064, y: 950, label: "FACE" },
+    ],
+    currentStep: 0,
+    lines: [],
+  },
+  {
+    id: 10,
+    color: "#FF3EC8",
+    dots: [
+      { x: 871, y: 1143, label: "PULL" },
+      { x: 386, y: 1143, label: "A" },
+      { x: 253, y: 1143, label: "FAST" },
+      { x: 135, y: 1064, label: "ONE" },
+    ],
+    currentStep: 0,
+    lines: [],
+  },
+];
 
   $: allDots = dotSets.flatMap((set, setIndex) => 
   set.dots.map((dot, dotIndex) => ({
@@ -395,13 +353,19 @@
         if (disappearIndex <= 0) {
           typeWriter("instructions", "")
           clearInterval(interval);
-            gameStart = "display: none;";
-            gameCounter = 4;
-            transitionHeight = gameHeight.target
-            transitionWidth = gameWidth.target
         }
       }, 20); // make dots disappear one by one
     }, 500);
+    setTimeout(() => {
+      gameContentOpacity.target = 0;
+    }, 1500)
+    setTimeout(() => {
+      transitionHeight = gameContainerHeight.target
+      transitionWidth = gameContainerWidth.target
+    }, 2000)
+    setTimeout(() => {
+      gameCounter = 4;
+    }, 2500)
   }
 }
 
@@ -417,7 +381,7 @@
     }, 2500);
     setTimeout(() => {
       typeWriter("instructions", "SHARE YOUR THOUGHTS.")
-      typeWriter("game-title", "CLICHÉ")
+      typeWriter("game-title", "4:CLICHÉ")
     }, 4500);
     setTimeout(() => {
       hintOpacity = 1
@@ -429,10 +393,10 @@
       handleResize(); // wait one tick
       dotSets = scaleDotSets(
         dotSets,
-        1300,
-        1477,
+        originalSVGWidth,
+        originalSVGHeight,
         gameContainerWidth.target,
-        gameContainerHeight.target - 100,
+        gameContainerHeight.target - 50,
         true,
         verticalPadding,
       );
@@ -465,38 +429,53 @@
     return () => window.removeEventListener("mousemove", handleMouseMove);
   });
 
+
   let isRunning = false;
-  function typeWriter(textID, newText, speed = 100) {
-    let element = document.getElementById(textID);
-    return new Promise((resolve) => {
-      let currentText = element.innerHTML;
-      let i = currentText.length;
-      let j = 0;
+  let animateHint = false;
+	let closeHint = false;
+  
+	function typeWriter(textID, newText, speed = 100) {
+		let element = document.getElementById(textID);
+		let typeDelay = 0;
+		if (textID === "hint") {
+			setTimeout(() => {
+				animateHint = true;
+			}, 10);
+			typeDelay = 1000;
+		}
 
-      function deleteText() {
-        if (i > 0) {
-          element.innerHTML = currentText.substring(0, i - 1);
-          i--;
-          setTimeout(deleteText, speed);
-        } else {
-          typeText();
-        }
-      }
+		setTimeout(() => {
+			return new Promise((resolve) => {
+				let currentText = element.innerHTML;
+				let i = currentText.length;
+				let j = 0;
 
-      function typeText() {
-        if (j < newText.length) {
-          element.innerHTML += newText.charAt(j);
-          j++;
-          setTimeout(typeText, speed);
-        } else {
-          isRunning = false;
-          resolve(); // done!
-        }
-      }
+				function deleteText() {
+					if (i > 0) {
+						element.innerHTML = currentText.substring(0, i - 1);
+						i--;
+						setTimeout(deleteText, speed);
+					} else {
+						typeText();
+					}
+				}
 
-      deleteText();
-    });
-  }
+				function typeText() {
+					if (j < newText.length) {
+						element.innerHTML += newText.charAt(j);
+						j++;
+						setTimeout(typeText, speed);
+					} else {
+						isRunning = false;
+						resolve(); // done!
+					}
+				}
+
+				deleteText();
+			});
+		}, typeDelay);
+	}
+
   let hintCount = 0;
   let hintsLeft = 2;
 
@@ -529,7 +508,7 @@
     left: {atDot ? atDot.x + 10 : 0}px;
   "
       />
-      <div class="game-contents">
+      <div class="game-contents"  style=" opacity:{gameContentOpacity.current};">
         <div
           class="instructions-container"
         >
@@ -539,17 +518,18 @@
             <div class="hint-button" on:click={hintButton} style="opacity: {hintOpacity}">
               <span>(?)</span> <span style="font-size:10px;">{hintsLeft}</span>
             </div>
-            <span class="tooltip-text">USE A HINT! I WON'T JUDGE YOU...</span>
+            <span class="tooltip-text">USE A HINT! WHY NOT?</span>
           </div>
         </div>
-        <div id="hint"></div>
+        <div id="hint" 			class:animate-hint={animateHint}
+        class:animate-hint-out={closeHint}></div>
 
         <div class="connect-container">
           <svg
             class="dotsSVG"
             width={gameContainerWidth.target}
-            height="calc({gameContainerHeight.target}-2em)"
-          >
+            height={gameContainerHeight.target - 32}
+                      >
             {#each dotSets as set}
               {#each set.lines as line}
                 <line
@@ -557,7 +537,7 @@
                   y1={line.from.y}
                   x2={line.to.x}
                   y2={line.to.y}
-                  stroke={allCompleted ? correctGreen : set.color}
+                  stroke={allCompleted ? correctGreen : lightGray}
                   stroke-width="1"
                 />
               {/each}
@@ -568,7 +548,7 @@
                   y1={set.dots[set.currentStep - 1].y}
                   x2={mouse.x}
                   y2={mouse.y}
-                  stroke={set.color}
+                  stroke={lightGray}
                   stroke-width="1"
                   stroke-dasharray="4"
                 />
@@ -637,7 +617,8 @@
     top: 70px;
     bottom: 0;
     right: 0;
-    z-index: 0;
+    z-index: 1;
+    overflow: visible;
   }
 
   #game-title {
@@ -649,7 +630,7 @@
     margin: auto;
     position: absolute;
     pointer-events: none;
-    z-index: 1;
+    z-index: 2;
   }
 
   .dot-container {
@@ -775,7 +756,7 @@
   }
   @media (max-width: 480px) {
     .click-fade-zone {
-      width: 50px;
+      width: 20px;
     }
   }
 
@@ -856,10 +837,49 @@
     opacity: 1;
   }
 
-  #hint {
-    height: 2em;
-    text-align: right;
-    color: var(--error-red);
-    transition: opacity 1s ease-in-out; /* Animation duration and effect */
-  }
+
+	#hint {
+		background-color: var(--error-red);
+		width: 100%;
+		text-align: center;
+		align-self: center;
+		align-items: center;
+		margin-left: auto;
+		height: 1.5em;
+		line-height: 1.5em;
+    margin-bottom: 1em;
+		font-weight: bold;
+		color: var(--light-gray);
+		transform: scaleX(0%);
+
+		transition: opacity 3s ease-in-out; /* Animation duration and effect */
+	}
+
+  @keyframes slideIn {
+		from {
+			transform: scaleX(0%);
+		}
+		to {
+			transform: scaleX(100%);
+		}
+	}
+
+	#hint.animate-hint {
+		animation: slideIn 0.5s ease-out forwards;
+	}
+
+	@keyframes slideOut {
+		from {
+			transform: scaleX(100%);
+		}
+		to {
+			transform: scaleX(0%);
+		}
+	}
+
+	#hint.animate-hint-out {
+		animation: slideOut 0.5s ease-out forwards;
+	}
+
+
 </style>

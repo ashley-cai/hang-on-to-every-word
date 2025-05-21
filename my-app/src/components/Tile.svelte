@@ -13,25 +13,20 @@
   let applyBounce = false;
   let delay = 0;
 
-  if (shouldBounce) {
-    tileOpacity = 0;
-  } else {
-    tileOpacity = 1;
-  }
+  $: tileOpacity = shouldBounce ? 0 : 1;
 
-  onMount(() => {
-    if (shouldBounce) {
-      delay = index * 100; // 100ms stagger per index
+onMount(() => {
+  if (shouldBounce) {
+    delay = index * 100;
+    setTimeout(() => {
+      applyBounce = true;
       setTimeout(() => {
-        applyBounce = true;
-        setTimeout(() => {
-          shouldBounce = false;
-          applyBounce = false;
-          tileOpacity = 1;
-        }, 600); // match animation duration
-      }, delay);
-    }
-  });
+        applyBounce = false;
+        shouldBounce = false; // bound back to parent
+      }, 600); // match animation
+    }, delay);
+  }
+});
 
   let darkGray = "#1c1c1c";
   let midGray = "#8e8d8c";
@@ -42,8 +37,8 @@
 
 
 <div
-class="square {correct} {applyBounce ? 'bounce-in' : ''} {bounceOut ? 'bounce-out' : ''}"
-style="
+  class="square {correct} {applyBounce ? 'bounce-in' : ''} {bounceOut ? 'bounce-out' : ''}"
+  style="
     --dark-gray: {darkGray};
     --mid-gray: {midGray};
     --light-gray: {lightGray};

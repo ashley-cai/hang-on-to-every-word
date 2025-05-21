@@ -66,7 +66,7 @@
     } else {
       // mobile screens
       gameWidth.target = 320;
-      gameHeight.target = 450;
+      gameHeight.target = 475;
     }
     setTimeout(() => {
       mobileRoots.target = 100;
@@ -157,7 +157,7 @@
           content = `The gnome, capable and congenial, is alone in the immense hospice, impervious is the attenuation of agency. This innate fusion, this adult protagonist, added capacity. Essential is the essence of the command, the quintessential hospitality. There, this agnostic agent click, complete and agile, attended the hospitable agenda. The diagnosis is circumspect, the ignoble circumstance that demand attenuation. Capiche? The top gnome intend not abnegate the capacity of captivating, inciting hostility in the perfunctory agency of the industry. Circa the perennial diagnosis, the plebeian renegade performed the perfuse effusion of essence, the anagogical fusion of physiognomy and genealogy. The plebiscite inflict not confusion; the essence managed circumnavigating the perimeter of congenital antagonism. Adorned in the negligee of ignorance, the plebe manufactured the symmetry of the circumstance. Thereabout, that perfumed hostage diffused the hostility of effusive compliment. The perplexed gnome demanded cryogenic supply, piecemeal, capable of negotiating tender, refunds. The circumstance abated, agonized, confused the hospitality of the adult gnome, instantly. The protagonist atoned, permanently, presently. None ignored the circuit of the metronome, the circumference of isometric supply. Alone, not lonely, the left gnome is capable of the intrinsic introspect, that instant of perspective in the permanent interior. Invert the corner circumstance, yes, and the quintessential one of the introduction is increasingly impervious. Represent the gentile, the genteel, the gentry—yes, the gnome is indigenous of the genre.`;
         }, 200);
         setTimeout(() => {
-          typeWriter("game-title", "ETYMOLOGY");
+          typeWriter("game-title", "2:ETYMOLOGY");
         }, 400);
       }, 3500);
 
@@ -302,12 +302,11 @@
   let isRunning = false;
   let animateHint = false;
 	let closeHint = false;
-	let transitioningGames = false;
 
 	function typeWriter(textID, newText, speed = 100) {
 		let element = document.getElementById(textID);
 		let typeDelay = 0;
-		if (textID === "hint" && transitioningGames === false) {
+		if (textID === "hint") {
 			setTimeout(() => {
 				animateHint = true;
 			}, 10);
@@ -356,9 +355,9 @@
       hintsLeft = 1;
       hintCount++;
     } else if (hintCount == 1) {
-      typeWriter("hint", "READ THE UNHIGHLIGHTED WORDS.");
+      typeWriter("hint", "READ THE UNHIGHLIGHTED WORDS...");
       hintsLeft = 0;
-      hintCount = 0;
+      hintCount++;
     }
   }
 
@@ -395,7 +394,7 @@
             <div class="hint-button" on:click={hintButton}>
               <span>(?)</span> <span style="font-size:10px;">{hintsLeft}</span>
             </div>
-            <span class="tooltip-text">Use a hint! I won't judge you...</span>
+            <span class="tooltip-text">USE A HINT! I DON'T HAVE ALL DAY...</span>
           </div>
         </div>
         <div id="hint" 			class:animate-hint={animateHint}
@@ -415,7 +414,7 @@
       class="roots"
       bind:innerHTML={rootContent}
       contenteditable="false"
-      style="opacity:{gameContentOpacity.current}; width: {sidePanelWidth.current}vw; height: {mobileRoots.current}px"
+      style="opacity:{gameContentOpacity.current}; width: {sidePanelWidth.current}vw; {isMobile ? 'height:' + mobileRoots.current + 'px': ""}"
     ></div>
   </div>
 </div>
@@ -486,8 +485,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.25em;
-      padding: 1em;
+      gap: 0;
     }
 
     .game-container-1 {
@@ -497,7 +495,7 @@
 
   .roots {
     align-self: center;
-    /* max-height: 70vh; */
+    height: 70vh;
     color: var(--mid-gray);
     display: flex;
     flex-direction: column;
@@ -505,6 +503,7 @@
     user-select: none;
     font-family: "ROMMONO";
     font-size: 10px;
+    width: 20px;
   }
   @media (max-width: 480px) {
     .roots {
@@ -637,12 +636,6 @@
 
 		transition: opacity 3s ease-in-out; /* Animation duration and effect */
 	}
-  /* @media (max-width: 480px) {
-    #hint {
-      height: 1em;
-      padding-bottom: 1em;
-    }
-  } */
 
   @keyframes slideIn {
 		from {

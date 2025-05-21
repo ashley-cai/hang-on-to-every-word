@@ -35,7 +35,7 @@
     duration: 500,
     easing: cubicOut,
   });
-  let hintButtonOpacity = 1;
+  let hintButtonOpacity = 0;
   let oneVW = 0;
   let rowSpacing = 0;
   let titleDisplay = "";
@@ -92,6 +92,13 @@
   const greenWords = writable([]);
 
   onMount(() => {
+    document.addEventListener(
+    "touchmove",
+    (e) => {
+      if (e.cancelable) e.preventDefault();
+    },
+    { passive: false }
+  );
     if (gameCounter == 4) {
       setTimeout(() => {
         typeWriter("title", "JARGON");
@@ -103,10 +110,13 @@
         gameContentOpacity.target = 1;
       }, 3500);
       setTimeout(() => {
-        typeWriter("game-title", "JARGON");
+        typeWriter("game-title", "5:JARGON");
         typeWriter("instructions", "EXTREMELY DARK. (2)");
         gameContentOpacity.target = 1;
       }, 4500);
+      setTimeout(() => {
+        hintButtonOpacity = 1;
+      }, 0); //TODO: 20000
     }
 
     if (typeof window !== "undefined") {
@@ -243,31 +253,54 @@
   // Function to handle the dragging of circles
   let draggedCircle = null;
   function startDrag(event, circle) {
-    draggedCircle = circle;
-    const offsetX = event.clientX - circle.cx;
-    const offsetY = event.clientY - circle.cy;
+  draggedCircle = circle;
+  const isTouch = event.type.startsWith("touch");
+  const clientX = isTouch ? event.touches[0].clientX : event.clientX;
+  const clientY = isTouch ? event.touches[0].clientY : event.clientY;
+  const offsetX = clientX - circle.cx;
+  const offsetY = clientY - circle.cy;
 
-    function moveDrag(event) {
-      draggedCircle.cx = Math.max(
-        draggedCircle.r * 1.5,
-        Math.min(width - draggedCircle.r * 1.5, event.clientX - offsetX),
-      );
-      draggedCircle.cy = Math.max(
-        draggedCircle.r,
-        Math.min(height - draggedCircle.r, event.clientY - offsetY),
-      );
-      circlesData.set([...$circlesData]); // Trigger reactivity
-      checkOverlaps();
-    }
+  function moveDrag(event) {
+    if (isTouch) event.preventDefault(); // ⛔ stop mobile scroll
 
-    function endDrag() {
+    const moveX = isTouch
+      ? event.touches[0].clientX
+      : event.clientX;
+    const moveY = isTouch
+      ? event.touches[0].clientY
+      : event.clientY;
+
+    draggedCircle.cx = Math.max(
+      draggedCircle.r * 1.5,
+      Math.min(width - draggedCircle.r * 1.5, moveX - offsetX)
+    );
+    draggedCircle.cy = Math.max(
+      draggedCircle.r,
+      Math.min(height - draggedCircle.r, moveY - offsetY)
+    );
+    circlesData.set([...get(circlesData)]); // trigger reactive update
+    checkOverlaps();
+  }
+
+  function endDrag() {
+    if (isTouch) {
+      window.removeEventListener("touchmove", moveDrag);
+      window.removeEventListener("touchend", endDrag);
+    } else {
       window.removeEventListener("mousemove", moveDrag);
       window.removeEventListener("mouseup", endDrag);
     }
+  }
 
+  if (isTouch) {
+    window.addEventListener("touchmove", moveDrag);
+    window.addEventListener("touchend", endDrag);
+  } else {
     window.addEventListener("mousemove", moveDrag);
     window.addEventListener("mouseup", endDrag);
   }
+}
+
 
   function getWordOverlaps(domain1, domain2) {
     let intersection = structuredData[domain1].filter((item) =>
@@ -320,37 +353,50 @@
   }
 
   let isRunning = false;
-  function typeWriter(textID, newText, speed = 100) {
-    let element = document.getElementById(textID);
-    return new Promise((resolve) => {
-      let currentText = element.innerHTML;
-      let i = currentText.length;
-      let j = 0;
+  let animateHint = false;
+	let closeHint = false;
 
-      function deleteText() {
-        if (i > 0) {
-          element.innerHTML = currentText.substring(0, i - 1);
-          i--;
-          setTimeout(deleteText, speed);
-        } else {
-          typeText();
-        }
-      }
+	function typeWriter(textID, newText, speed = 100) {
+		let element = document.getElementById(textID);
+		let typeDelay = 0;
+		if (textID === "hint") {
+			setTimeout(() => {
+				animateHint = true;
+			}, 10);
+			typeDelay = 1000;
+		}
 
-      function typeText() {
-        if (j < newText.length) {
-          element.innerHTML += newText.charAt(j);
-          j++;
-          setTimeout(typeText, speed);
-        } else {
-          isRunning = false;
-          resolve(); // done!
-        }
-      }
+		setTimeout(() => {
+			return new Promise((resolve) => {
+				let currentText = element.innerHTML;
+				let i = currentText.length;
+				let j = 0;
 
-      deleteText();
-    });
-  }
+				function deleteText() {
+					if (i > 0) {
+						element.innerHTML = currentText.substring(0, i - 1);
+						i--;
+						setTimeout(deleteText, speed);
+					} else {
+						typeText();
+					}
+				}
+
+				function typeText() {
+					if (j < newText.length) {
+						element.innerHTML += newText.charAt(j);
+						j++;
+						setTimeout(typeText, speed);
+					} else {
+						isRunning = false;
+						resolve(); // done!
+					}
+				}
+
+				deleteText();
+			});
+		}, typeDelay);
+	}
   let hintCount = 0;
   let hintsLeft = 2;
 
@@ -364,7 +410,7 @@
     } else if (hintCount == 1) {
       typeWriter("hint", "WHAT'S ANOTHER 2-WORD WAY TO SAY THIS?");
       hintsLeft = 0;
-      hintCount = 0;
+      hintCount++;
     }
   }
 
@@ -386,21 +432,33 @@
             <div class="hint-button" on:click={hintButton}>
               <span>(?)</span> <span style="font-size:10px;">{hintsLeft}</span>
             </div>
-            <span class="tooltip-text">Use a hint! I won't judge you...</span>
+            <span class="tooltip-text">USE A HINT! DON'T BE SCARED...</span>
           </div>
         </div>
-        <div id="hint"></div>
+        <div id="hint" 			class:animate-hint={animateHint}
+        class:animate-hint-out={closeHint}></div>
 
         <svg
           bind:this={svgElement}
           style="width: {width}px; height: {height}px"
         >
+        <defs>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="4" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
           <!-- Circles -->
           {#each $circlesData as circle (circle.id)}
-            <g
-              transform="translate({circle.cx},{circle.cy})"
-              on:mousedown={(event) => startDrag(event, circle)}
-            >
+          <g
+          transform="translate({circle.cx},{circle.cy})"
+          on:mousedown={(event) => startDrag(event, circle)}
+          on:touchstart={(event) => startDrag(event, circle)}
+        >        
               <circle class="circle" r={circle.r} bind:this={circle.el} />
               <text
               class="venn-circle-label"
@@ -414,15 +472,16 @@
           <!-- Overlap text -->
           {#each $overlaps as { cx, cy, text }}
             {#each text as t, i}
-              <text
-                class="overlap-text"
-                text-anchor="center"
-                x={cx}
-                y={cy + i * 20}
-                on:click={() => addToRack(t)}
-              >
-                {t}
-              </text>
+            <text
+            class="overlap-text"
+            text-anchor="center"
+            x={cx}
+            y={cy + i * 20}
+            filter="url(#glow)"
+            on:click={() => addToRack(t)}
+          >
+            {t}
+          </text>
             {/each}
           {/each}
         </svg>
@@ -503,8 +562,6 @@
     font-size: 1em;
     user-select: none;
     -webkit-user-select: none; /* Safari */
-    filter: drop-shadow(0px 0px 4px var(--light-gray))
-    drop-shadow(0px 0px 8px var(--light-gray));
     cursor: pointer;
   }
 
@@ -556,7 +613,7 @@
 
   .rack-word {
     cursor: pointer;
-    height: calc(min(3.5vmin, 36px));
+    height: 2em;
     /* width: calc(min(5vmin, 50px)); */
     user-select: none;
     padding-left: 12px;
@@ -575,6 +632,12 @@
       box-shadow 1s ease-in-out,
       opacity 0.5s 2s ease-in-out; /* Animation duration and effect */
   }
+  @media (max-width: 480px) {
+    .rack-word {
+    padding-left: .75em;
+    padding-right: .75em;
+		}
+	}
 
   .rack-word.green {
     background-color: var(--correct-green);
@@ -644,13 +707,48 @@
     opacity: 1;
   }
 
-  #hint {
-    height: 2em;
-    text-align: right;
-    margin-left: auto;
-    /* padding-bottom: 2em; */
-    font-weight: bold;
-    color: var(--error-red);
-    transition: opacity 1s ease-in-out; /* Animation duration and effect */
-  }
+
+	#hint {
+		background-color: var(--error-red);
+		width: 100%;
+		text-align: center;
+		align-self: center;
+		align-items: center;
+		margin-left: auto;
+		height: 1.5em;
+		line-height: 1.5em;
+    margin-bottom: 1em;
+		font-weight: bold;
+		color: var(--light-gray);
+		transform: scaleX(0%);
+
+		transition: opacity 3s ease-in-out; /* Animation duration and effect */
+	}
+
+  @keyframes slideIn {
+		from {
+			transform: scaleX(0%);
+		}
+		to {
+			transform: scaleX(100%);
+		}
+	}
+
+	#hint.animate-hint {
+		animation: slideIn 0.5s ease-out forwards;
+	}
+
+	@keyframes slideOut {
+		from {
+			transform: scaleX(100%);
+		}
+		to {
+			transform: scaleX(0%);
+		}
+	}
+
+	#hint.animate-hint-out {
+		animation: slideOut 0.5s ease-out forwards;
+	}
+
 </style>

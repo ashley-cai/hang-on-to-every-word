@@ -29,13 +29,22 @@
 	{#each items as tile (tile.id)}
 	<Tile
 	  word={tile.word}
-	  shouldBounce={true}
 	  index={index}
 	  hidden={tile[SHADOW_ITEM_MARKER_PROPERTY_NAME]}
+	  bind:shouldBounce={tile.shouldBounce}
 	  bounceOut = {bounceOut}
 	/>
   {/each}
-  
+  <!-- {#each items as tile (tile.id)}
+  {#if !tile[SHADOW_ITEM_MARKER_PROPERTY_NAME]}
+	<Tile
+	  word={tile.word}
+	  index={index}
+	  bind:shouldBounce={tile.shouldBounce}
+	  bounceOut={bounceOut}
+	/>
+  {/if}
+{/each} -->
 </div>
 
 <style>

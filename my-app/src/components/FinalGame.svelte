@@ -10,7 +10,7 @@
 	let darkGray = "#1c1c1c";
 	let midGray = "#8e8d8c";
 	let lightGray = "#e6e6e6";
-    let errorRed = "#880000";
+	let errorRed = "#880000";
 	let correctGreen = "#E8FFB7";
 
 	export let gameCounter;
@@ -18,7 +18,28 @@
 	export let transitionWidth;
 	let windowWidth = 0;
 
-	const gameContentOpacity = new Tween(0, { delay: 1000, duration: 1000, easing: cubicOut });
+	let wordsRevealIndex = 0;
+	const wordsReveal = [
+  "Hang__GLOW__", "on__GLOW__", "to__GLOW__", "every__GLOW__", "word.__GLOW__", "It’s", "a", "phrase", "we’ve", "all", "heard", "somewhere—describing", "a", "child", "captivated", "by", "his", "basketball", "idol’s", "TED", "talk,", "or", "in", "a", "housewife’s", "review", "of", "her", "favorite", "true", "crime", "podcast—but", "doubtfully", "ever", "investigated.", "The", "meaning", "of", "the", "phrase", "is", "obvious:", "pay", "attention.", "This", "time,", "let's", "direct", "that", "gaze", "inwards.", "Let’s", "pay", "attention", "to", "the", "saying", "itself.",
+
+  "__BR__First,", "HANG__GLOW__", "ON__GLOW__", "can", "mean", "to", "keep", "a", "jacket", "your", "friend", "left", "on", "your", "couch,", "or", "to", "grab", "tightly", "onto", "your", "mom’s", "hand", "in", "the", "rain.", "It", "can", "mean", "to", "wait", "a", "moment", "while", "your", "date", "pays", "the", "bill,", "to", "grit", "your", "teeth", "as", "your", "dad", "drives", "through", "an", "unpaved", "backroad,", "or", "of", "course,", "to", "pay", "attention.", "The", "phrase", "hangs", "on", "to", "multitudes,", "yet", "somehow,", "we’re", "never", "confused.",
+
+  "__BR__Next,", "the", "word", "EVERY__GLOW__", "comes", "from", "a", "14th", "century", "contraction", "of", "“each”", "(all)", "and", "“ever”", "(always).", "Ever", "each,", "ever-each,", "evereach,", "every.", "The", "first", "attestation", "of", "EVERY__GLOW__", "comes", "from", "The", "Canterbury", "Tales,", "the", "text", "responsible", "for", "popularizing", "English", "in", "mainstream", "literature", "and", "displacing", "French", "and", "Latin.", "Every", "word", "we", "carelessly", "toss", "around", "contains", "a", "rich,", "layered", "history.",
+
+  "__BR__Finally,", "to", "have", "the", "ability", "to", "hang", "onto", "every", "WORD__GLOW__", "is", "to", "materialize", "language", "in", "your", "grasp.", "They", "are", "daggers", "you", "can", "have", "in", "an", "argument,", "snacks", "to", "binge", "eat", "when", "embarrassed,", "a", "fluorescent", "jungle", "gym", "to", "play", "on.", "The", "entirety", "of", "the", "English", "language", "is", "a", "physical", "thing", "we", "can", "grasp.",
+
+  "__BR__We", "don’t", "think", "about", "these", "features", "when", "we", "use", "words.", "We", "just", "know", "where", "they’re", "allowed", "to", "be", "placed,", "so", "we", "awkwardly", "slot", "them", "into", "sentences", "like", "primitive", "pattern", "matching", "machines.", "We", "follow", "rules", "and", "sounds", "that", "we’ve", "internalized,", "but", "don’t", "fully", "understand.", "That", "internalization", "lets", "us", "stop", "paying", "attention.",
+
+  "__BR__But", "if", "we", "know", "we", "exist", "in", "this", "storied", "world,", "if", "we", "are", "aware", "of", "the", "logic", "behind", "each", "phrase’s", "construction,", "if", "we", "peer", "a", "little", "past", "our", "expectations—a", "sudden", "turn", "of", "phrase", "can", "have", "us", "careening", "down", "an", "alleyway", "that", "we’d", "never", "noticed,", "wandering", "along", "the", "street", "paved", "with", "translation,", "stubbornly", "unfamiliar,", "feet", "sliding,", "stumbling,", "slipping", "on", "the", "rain-slicked", "tongue—we", "can", "actually", "begin", "to", "hang", "on.",
+
+  "__BR__I__GLOW__", "hope__GLOW__", "you__GLOW__", "experience__GLOW__", "a__GLOW__", "little__GLOW__", "more__GLOW__", "in__GLOW__", "every__GLOW__", "word__GLOW__", "too.__GLOW__"
+];
+
+	const gameContentOpacity = new Tween(0, {
+		delay: 1000,
+		duration: 1000,
+		easing: cubicOut,
+	});
 	const gameHeight = new Tween(transitionHeight, {
 		duration: 500,
 		easing: cubicOut,
@@ -29,8 +50,12 @@
 		easing: cubicOut,
 	});
 
+	let responsiveFontSize = "10px";
+	let responsivePadding = 40;
+	let responsiveHeight = 30;
+	let responsiveRadius = 17;
+
 	function setGameDimensions(wWidth) {
-		console.log(wWidth);
 		if (width >= 1200) {
 			// large screens
 			gameHeight.target = 500;
@@ -47,6 +72,10 @@
 			// mobile screens
 			gameHeight.target = 400;
 			gameWidth.target = 350;
+			responsiveFontSize = "7px";
+			responsivePadding = 20;
+			responsiveRadius = 11.5;
+			responsiveHeight = 20;
 		}
 	}
 
@@ -64,8 +93,8 @@
 	let showModal = true;
 	let width = 0;
 	let height = 0;
-	const boxHeight = 50;
-	const boxWidth = 50;
+	const boxHeight = 30;
+	const boxWidth = 30;
 
 	let boxes = [];
 
@@ -110,10 +139,10 @@
 			handleResize(); // set initial size
 			window.addEventListener("resize", handleResize);
 		}
-			setTimeout(() => {
-				typeWriter("instructions", "HANG ON...");
-			}, 1000);
-		
+		setTimeout(() => {
+			typeWriter("instructions", "HANG ON...");
+		}, 1000);
+
 		if (!browser) return;
 
 		width = window.innerWidth;
@@ -129,7 +158,7 @@
 				width,
 				height,
 				wireframes: false,
-				background: darkGray,
+				background: "transparent",
 				pixelRatio: window.devicePixelRatio || 1,
 			},
 		});
@@ -180,10 +209,29 @@
 		Matter.World.add(engine.world, mouseConstraint);
 		render.mouse = mouse;
 
+		Matter.Events.on(mouseConstraint, "mousedown", function (event) {
+			const mousePosition = event.mouse.position;
+			const clickedBodies = Matter.Query.point(boxes, mousePosition);
+
+			if (clickedBodies.length > 0) {
+				const clickedBox = clickedBodies[0];
+
+				// 1. Reveal next word
+				revealWord(wordsReveal[wordsRevealIndex]);
+				wordsRevealIndex++;
+
+				// 2. Remove from Matter.js world
+				Matter.World.remove(engine.world, clickedBox);
+
+				// 3. Remove from boxes array
+				boxes = boxes.filter((b) => b !== clickedBox);
+			}
+		});
+
 		// Draw rounded glowing rectangles with text
 		Matter.Events.on(render, "afterRender", () => {
 			const ctx = render.context;
-			ctx.font = "10px sans-serif";
+			ctx.font = responsiveFontSize + " sans-serif";
 			ctx.textAlign = "center";
 			ctx.textBaseline = "middle";
 
@@ -192,7 +240,7 @@
 				ctx.translate(box.position.x, box.position.y);
 				ctx.rotate(box.angle);
 
-				const radius = 17;
+				const radius = responsiveRadius;
 				const w = box.boxWidth || boxWidth;
 				const h = box.boxHeight || boxHeight;
 
@@ -235,52 +283,57 @@
 		});
 	});
 
+	let allWordsSpawned = false;
+
 	function spawnFromCenter() {
-	const centerX = width / 2;
-	const centerY = height / 4;
-	const ctx = render.context;
-	ctx.font = "10px sans-serif";
+		const centerX = width / 2;
+		const centerY = height / 4;
+		const ctx = render.context;
+		ctx.font = responsiveFontSize + " sans-serif";
 
-	let i = 0;
-	let delay = 1000; // Start slow
-	const minDelay = 150; // Don't go faster than this
-	const decayFactor = 0.95; // Shrinks delay each time
+		let i = 0;
+		let delay = 1000;
+		const minDelay = 150;
+		const decayFactor = 0.95;
 
-	function spawnNext() {
-		if (i >= words.length) return;
+		function spawnNext() {
+			if (i >= words.length) {
+				allWordsSpawned = true;
+				return;
+			}
 
-		const word = words[i];
-		const textWidth = ctx.measureText(word).width;
-		const padding = 40;
-		const rectWidth = textWidth + padding;
-		const rectHeight = 30;
+			const word = words[i];
+			const textWidth = ctx.measureText(word).width;
+			const padding = responsivePadding;
+			const rectWidth = textWidth + padding;
+			const rectHeight = responsiveHeight;
 
-		const x = centerX + (Math.random() - 0.5) * 10;
-		const y = centerY + (Math.random() - 0.5) * 10;
+			const x = centerX + (Math.random() - 0.5) * 10;
+			const y = centerY + (Math.random() - 0.5) * 10;
 
-		const box = Matter.Bodies.rectangle(x, y, rectWidth, rectHeight, {
-			restitution: 0.2,
-			friction: 0.5,
-			render: {
-				fillStyle: "transparent",
-				strokeStyle: "transparent",
-			},
-		});
+			const box = Matter.Bodies.rectangle(x, y, rectWidth, rectHeight, {
+				restitution: 0.2,
+				friction: 0.5,
+				render: {
+					fillStyle: "transparent",
+					strokeStyle: "transparent",
+				},
+			});
 
-		box.label = word;
-		box.boxWidth = rectWidth;
-		box.boxHeight = rectHeight;
+			box.label = word;
+			box.boxWidth = rectWidth;
+			box.boxHeight = rectHeight;
 
-		boxes.push(box);
-		Matter.World.add(engine.world, box);
+			boxes.push(box);
+			Matter.World.add(engine.world, box);
 
-		i++;
-		delay = Math.max(minDelay, delay * decayFactor); // Speed up
-		setTimeout(spawnNext, delay);
+			i++;
+			delay = Math.max(minDelay, delay * decayFactor); // Speed up
+			setTimeout(spawnNext, delay);
+		}
+
+		spawnNext();
 	}
-
-	spawnNext();
-}
 
 	function handleModalClick() {
 		showModal = false;
@@ -298,12 +351,44 @@
 		render?.canvas?.remove();
 		if (render?.textures) render.textures = {};
 	});
+
+	let revealedWords = [];
+
+	function revealWord(word) {
+		revealedWords = [...revealedWords, word];
+	}
 </script>
 
 <div
 	class="page-container"
 	style=" --dark-gray: {darkGray}; --mid-gray: {midGray}; --light-gray: {lightGray};"
 >
+	<p class="background-paragraph">
+		{#each revealedWords as word}
+			{#if word.includes("__BR__")}
+				<br />
+				<br />
+				{#if word.includes("__GLOW__")}
+					<span class="fade-word glow">
+						{word.replace("__BR__", "").replace("__GLOW__", "")}
+					</span>
+				{:else}
+					<span class="fade-word">
+						{word.replace("__BR__", "")}
+					</span>
+				{/if}
+			{:else if word.includes("__GLOW__")}
+				<span class="fade-word glow"
+					>{word.replace("__GLOW__", "")}
+				</span>
+			{:else}
+				<span class="fade-word">
+					{word}
+				</span>
+			{/if}
+		{/each}
+	</p>
+
 	<!-- 🖼 Canvas container where Matter.js appends the canvas -->
 	<div bind:this={container} class="scene" />
 
@@ -315,8 +400,14 @@
 			on:click={handleModalClick}
 			transition:fade
 		>
-			<div style="opacity: {gameContentOpacity.current}" class="loader"></div>
-			<div style="opacity: {gameContentOpacity.current}" id="instructions"></div>
+			<div
+				style="opacity: {gameContentOpacity.current}"
+				class="loader"
+			></div>
+			<div
+				style="opacity: {gameContentOpacity.current}"
+				id="instructions"
+			></div>
 		</div>
 	{/if}
 </div>
@@ -383,6 +474,41 @@
 		}
 		100% {
 			transform: rotate(360deg);
+		}
+	}
+
+	.background-paragraph {
+		position: absolute;
+		top: 40px;
+		width: 480px;
+		color: var(--light-gray);
+		/* z-index: 1; */
+		pointer-events: none;
+	}
+	@media (max-width: 480px) {
+		.background-paragraph {
+			width: 350px;
+		}
+	}
+
+	.glow {
+		-webkit-filter: drop-shadow(0px 0px 4px var(--light-gray));
+	}
+
+	.fade-word {
+		animation: fadeIn 0.6s ease-out;
+		display: inline-block;
+		margin: 0 0.15em;
+	}
+
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+			transform: translateY(0.5em);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
 		}
 	}
 </style>

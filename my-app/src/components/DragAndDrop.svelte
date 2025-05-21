@@ -6,9 +6,8 @@
 	import Slot from "./Slot.svelte";
 	import { error } from "@sveltejs/kit";
 	import { Tween } from "svelte/motion";
-	import { fade } from "svelte/transition";
 	import { cubicInOut, cubicOut } from "svelte/easing";
-	import { SHADOW_ITEM_MARKER_PROPERTY_NAME } from 'svelte-dnd-action';
+	import { SHADOW_ITEM_MARKER_PROPERTY_NAME } from "svelte-dnd-action";
 
 	export let itemsStart = [];
 	export let gameNumber = 0;
@@ -20,7 +19,6 @@
 	let midGray = "#8e8d8c";
 	let lightGray = "#e6e6e6";
 	let errorRed = "#880000";
-	
 
 	const gameContainerHeight = new Tween(500, {
 		duration: 500,
@@ -34,7 +32,6 @@
 	let windowWidth = 0;
 
 	function setGameDimensions(width) {
-		console.log(width);
 		if (width >= 1200) {
 			// large screens
 			gameContainerHeight.target = 500;
@@ -112,7 +109,7 @@
 		}, typeDelay);
 	}
 	let hintCount = 0;
-	let hintsLeft = 3;
+	let hintsLeft = 2;
 	export let glowCart = false;
 
 	//check to give a hint
@@ -155,6 +152,9 @@
 							closeHint = true;
 						}
 						animateHint = false;
+					}, 2500);
+					setTimeout(() => {
+						closeHint = false;
 					}, 3000);
 					transitioningGames = false;
 				}, 700);
@@ -166,6 +166,7 @@
 					hintsLeft = 4;
 					setTimeout(() => {
 						hintButtonOpacity = 1;
+						hintCount = 0;
 					}, 10000);
 				}, 3000);
 			}
@@ -191,10 +192,10 @@
 				} else if (hintCount == 1) {
 					typeWriter(
 						"hint",
-						"TRY A DIFFERENT ORDER, LIKE WORD LENGTH OR ALPHABETICAL...",
+						"TRY WORD LENGTH OR ALPHABETICAL...",
 					);
 					hintsLeft = 0;
-					hintCount = 0;
+					hintCount++;
 				}
 			} else if (gameNumber == 2) {
 				if (hintCount == 0) {
@@ -216,7 +217,7 @@
 					typeWriter("hint", "REALLY LOOK!");
 					glowCart = true;
 					hintsLeft = 0;
-					hintCount = 1;
+					hintCount++;
 				}
 			}
 		}
@@ -249,6 +250,7 @@
 
 	const flipDurationMs = 100;
 	let screenWidth = 0;
+	let preventScroll = (e) => e.preventDefault();
 
 	onMount(() => {
 		screenWidth = window.innerWidth;
@@ -268,16 +270,15 @@
 			}, 2500);
 		}, 500);
 
+		window.addEventListener("touchmove", preventScroll, { passive: false });
 		window.addEventListener("mouseup", checkConditions);
 		window.addEventListener("touchend", checkConditions);
-
 
 		return () => {
 			window.removeEventListener("mouseup", checkConditions);
 			window.removeEventListener("touchend", checkConditions);
 		};
 	});
-	
 </script>
 
 {#if ready}
@@ -308,7 +309,7 @@
 					<span>{hintsLeft}</span>
 				</div>
 				<span class="tooltip-text"
-					>Use a hint! I won't judge you...</span
+					>USE A HINT! I WON'T JUDGE YOU...</span
 				>
 			</div>
 		</div>
@@ -329,7 +330,12 @@
 			top: {(gameContainerHeight.target * square.y) / 100}px;
 		  "
 				>
-					<Slot disableDrag={true} items={[square]} index={i} bounceOut={square.bounceOut} />
+					<Slot
+						disableDrag={true}
+						items={[square]}
+						index={i}
+						bounceOut={square.bounceOut}
+					/>
 				</div>
 			{/each}
 		</div>
@@ -345,14 +351,26 @@
 			on:consider={handleDnd}
 			on:finalize={handleDnd}
 		>
-		{#each items1 as item, i (item.id)}
-		<div class="tile-container" animate:flip={{ duration: flipDurationMs }}>
-		  <div style="z-index: 1; position: relative; opacity: {item[SHADOW_ITEM_MARKER_PROPERTY_NAME] ? 0 : 1};">
-			<Tile correct={correct_class} word={item.word} bounceOut={item.bounceOut} />
-		  </div>
-		</div>
-	  {/each}
-	  
+			{#each items1 as item, i (item.id)}
+				<div
+					class="tile-container"
+					animate:flip={{ duration: flipDurationMs }}
+				>
+					<div
+						style="z-index: 1; position: relative; opacity: {item[
+							SHADOW_ITEM_MARKER_PROPERTY_NAME
+						]
+							? 0
+							: 1};"
+					>
+						<Tile
+							correct={correct_class}
+							word={item.word}
+							bounceOut={item.bounceOut}
+						/>
+					</div>
+				</div>
+			{/each}
 		</div>
 		<div class="level-complete"></div>
 	</div>
@@ -489,7 +507,8 @@
 		margin-left: auto;
 		height: 1.5em;
 		line-height: 1.5em;
-		margin-bottom: 14em;
+		margin-top: .5em;
+		margin-bottom: 13.5em;
 		font-weight: bold;
 		color: var(--light-gray);
 		transform: scaleX(0%);
@@ -558,8 +577,8 @@
 	}
 	@media (max-width: 480px) {
 		.rack > * {
-		margin: 3px;
-	}
+			margin: 3px;
+		}
 	}
 
 	.tile-container {
@@ -625,7 +644,7 @@
 		box-sizing: border-box;
 	}
 	@media (max-width: 480px) {
-		.tooltip-text  {
+		.tooltip-text {
 			display: none;
 		}
 	}

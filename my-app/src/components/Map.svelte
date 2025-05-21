@@ -8,6 +8,8 @@
   let midGray = "#8e8d8c";
   let lightGray = "#e6e6e6";
   let errorRed = "#880000";
+  let correctGreen = "#E8FFB7";
+
   export let transitionHeight;
   export let transitionWidth;
 
@@ -46,7 +48,7 @@
       gameHeight.target = 500;
     } else {
       // mobile screens
-      gameWidth.target = 300;
+      gameWidth.target = 350;
       gameHeight.target = 600;
     }
   }
@@ -75,7 +77,7 @@
     if (gameCounter == 2) {
       gameStart = "display: flex;";
       setTimeout(() => {
-        typeWriter("title", "METAPHORS");
+        typeWriter("title", "METAPHOR");
       }, 1000);
       setTimeout(() => {
         typeWriter("title", "");
@@ -84,7 +86,7 @@
         gameContentOpacity.target = 1;
       }, 3500);
       setTimeout(() => {
-        typeWriter("game-title", "METAPHORS");
+        typeWriter("game-title", "3:METAPHOR");
       }, 4500);
 
       setTimeout(() => {
@@ -169,9 +171,16 @@
         function winCondition() {
           setTimeout(() => {
             const pegmen = document.querySelectorAll(".pegman");
+            const labels = document.querySelectorAll(".label");
             pegmen.forEach((pegman) => {
               setTimeout(() => {
-                pegman.classList.add("correct"); // Add correct class when faded out
+                pegman.classList.add("correct-pegman"); // Add correct class when faded out
+              }, 0); // wait for fade-out to complete
+            });
+            console.log(labels)
+            labels.forEach((label) => {
+              setTimeout(() => {
+                label.classList.add("correct-label"); // Add correct class when faded out
               }, 0); // wait for fade-out to complete
             });
           }, 0);
@@ -401,7 +410,7 @@ document.addEventListener("touchend", onMouseUp);
     } else if (hintCount == 2) {
       typeWriter("hint", "LABEL + POSITION = ?");
       hintsLeft = 0;
-      hintCount = 1;
+      hintCount++;
     }
   }
 
@@ -416,7 +425,7 @@ document.addEventListener("touchend", onMouseUp);
   <div class="page-container" style={gameStart}>
     <div
       class="game-container"
-      style="{gameStart} --dark-gray: {darkGray}; --mid-gray: {midGray}; --light-gray: {lightGray};  --error-red: {errorRed}; height: {gameHeight.current +
+      style="{gameStart} --dark-gray: {darkGray}; --mid-gray: {midGray}; --light-gray: {lightGray};  --error-red: {errorRed}; --correct-green: {correctGreen}; height: {gameHeight.current +
         'px'}; width: {gameWidth.current + 'px'};"
     >
       <div
@@ -431,7 +440,7 @@ document.addEventListener("touchend", onMouseUp);
             <div class="hint-button" on:click={hintButton}>
               <span>(?)</span> <span style="font-size:10px;">{hintsLeft}</span>
             </div>
-            <span class="tooltip-text">USE A HINT! I WON'T JUDGE YOU...</span>
+            <span class="tooltip-text">USE A HINT! LOOK CLOSELY...</span>
           </div>
         </div>
         <div id="hint"
@@ -529,7 +538,7 @@ document.addEventListener("touchend", onMouseUp);
     --pegman-correct: url("/pegman-correct.png");
   }
 
-  :global(.correct) {
+  :global(.correct-pegman) {
     background-image: var(--pegman-correct) !important;
   }
 
@@ -598,6 +607,11 @@ document.addEventListener("touchend", onMouseUp);
     pointer-events: none;
     font-family: sans-serif;
     -webkit-filter: drop-shadow(0px 0px 4px var(--light-gray));
+  }
+
+  :global(.correct-label) {
+    color: var(--correct-green) !important;
+    -webkit-filter: drop-shadow(0px 0px 4px var(--correct-green)) !important;
   }
 
   .pegman:active {

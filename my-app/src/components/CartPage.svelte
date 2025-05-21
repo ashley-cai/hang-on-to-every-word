@@ -2,9 +2,9 @@
 	import DragAndDrop from "./DragAndDrop.svelte";
 	import { dndzone } from "svelte-dnd-action";
 	import Tile from "./Tile.svelte";
-
+	import { fade } from "svelte/transition";
 	import { Tween } from "svelte/motion";
-	import { cubicOut } from "svelte/easing";
+	import { bounceOut, cubicOut } from "svelte/easing";
 	import { onMount } from "svelte";
 	import { getContext } from "svelte";
 
@@ -26,6 +26,8 @@
 	let screenWidth = 0;
 
 	onMount(() => {
+		screenWidth = window.innerWidth;
+
 		const handleResize = () => {
 			const width = window.innerWidth;
 			const height = window.innerHeight;
@@ -48,7 +50,6 @@
 	let cartVisibleColor = midGray;
 	let endTransition = 0.5;
 	let winConditionFade = 1;
-	let itemsExitingRack = [];
 
 	let items1 = [];
 
@@ -72,34 +73,36 @@
 
 				if (itemsCart.length === 0) {
 					// Step 1: Mark rack and grid items to bounce out
-					const rackWords = new Set(items1.map((item) => item.word));
-
+					const rackWords = new Set(items1.map((item) => item));
 					// Mark all for bounce out
 					items1 = items1.map((item) => ({
 						...item,
 						bounceOut: true,
 					}));
-					const updatedGridItems = itemsStart[gameNumber].map(
+					let updatedGridItems = itemsStart[gameNumber].map(
 						(item) => {
-							return {
-								...item,
-								bounceOut: !rackWords.has(item.word), // bounce out only if not in rack
-							};
+							if (!rackWords.has(item)) {
+								return {
+									...item,
+									bounceOut: true,
+								};
+							}
 						},
 					);
 
-					itemsStart[gameNumber] = updatedGridItems; // ✅ apply updated array with bounceOut flags
+					updatedGridItems = updatedGridItems.filter((item) => {
+						if (item) {
+							return {item}
+						}
+					})
+					console.log(updatedGridItems)
+
+					itemsStart[gameNumber] = updatedGridItems; // apply updated array with bounceOut flags
 
 					// Step 2: Wait for bounce-out, then move to cart
 					setTimeout(() => {
 						// Move all into cart with bounceIn
-						const seen = new Set();
 						itemsCart = [...items1, ...itemsStart[gameNumber]]
-							.filter((item) => {
-								if (seen.has(item.word)) return false;
-								seen.add(item.word);
-								return true;
-							})
 							.map((item) => ({
 								...item,
 								bounceOut: false,
@@ -120,23 +123,23 @@
 
 	let itemsStart = [
 		[
-			{ id: idx++, word: "HANG", x: 60, y: 20 },
-			{ id: idx++, word: "ON", x: 10, y: 15 },
-			{ id: idx++, word: "TO", x: 66, y: 60 },
-			{ id: idx++, word: "EVERY", x: 40, y: 70 },
-			{ id: idx++, word: "WORD", x: 24, y: 54 },
+			{ id: idx++, word: "HANG", x: 60, y: 20, shouldBounce: true },
+			{ id: idx++, word: "ON", x: 10, y: 15, shouldBounce: true },
+			{ id: idx++, word: "TO", x: 66, y: 60, shouldBounce: true },
+			{ id: idx++, word: "EVERY", x: 40, y: 70, shouldBounce: true},
+			{ id: idx++, word: "WORD", x: 24, y: 54, shouldBounce: true },
 		],
 		[
-			{ id: idx++, word: "KEEP", x: 10, y: 67 },
-			{ id: idx++, word: "AN", x: 65, y: 27 },
-			{ id: idx++, word: "EYE", x: 34, y: 56 },
-			{ id: idx++, word: "OUT", x: 24, y: 15 },
+			{ id: idx++, word: "KEEP", x: 10, y: 67, shouldBounce: true },
+			{ id: idx++, word: "AN", x: 65, y: 27, shouldBounce: true },
+			{ id: idx++, word: "EYE", x: 34, y: 56, shouldBounce: true },
+			{ id: idx++, word: "OUT", x: 24, y: 15, shouldBounce: true },
 		],
 		[
-			{ id: idx++, word: "CART", x: 45, y: 17 },
-			{ id: idx++, word: "BEFORE", x: 7, y: 24 },
-			{ id: idx++, word: "THE", x: 14, y: 63 },
-			{ id: idx++, word: "HORSE", x: 65, y: 47 },
+			{ id: idx++, word: "EASIER", x: 45, y: 17, shouldBounce: true },
+			{ id: idx++, word: "SAID", x: 7, y: 24, shouldBounce: true },
+			{ id: idx++, word: "THAN", x: 14, y: 63, shouldBounce: true },
+			{ id: idx++, word: "DONE", x: 65, y: 47, shouldBounce: true },
 		],
 	];
 
@@ -260,7 +263,7 @@
 					<span
 						class="tooltip-text"
 						style="opacity: {gameNumber === 2 ? '0' : '1'}"
-						>Shhh... try again later</span
+						>SHHH... TRY AGAIN LATER</span
 					>
 				</div>
 			</div>
@@ -278,7 +281,7 @@
 		<div class="footer" style="opacity: {winConditionFade}">
 			<div class="separator"></div>
 			<div class="footer-text">
-				<div>© 2025 HANGONTOEVERYWORD.com.</div>
+				<div>©2025 HANGONTOEVERYWORD.COM</div>
 				<div
 					class="checkout {checkoutGlow ? 'glow' : ''}"
 					style="color:{cartVisibleColor}"
@@ -291,20 +294,23 @@
 	</div>
 
 	{#if showMoreGamesModal}
-		<div class="modal-backdrop" on:click={closeModals}>
-			<div class="modal-content" on:click|stopPropagation>
+		<div class="modal-backdrop" on:click={closeModals} transition:fade={{ duration: 300 }}>
+			<div class="modal-content" on:click|stopPropagation >
 				<div>
-					Why don't you finish this game before trying out some
-					others?
+					WHY DON'T YOU FINISH THIS GAME BEFORE TRYING OUT OTHERS?
 				</div>
 			</div>
 		</div>
 	{/if}
 
 	{#if showAboutModal}
-		<div class="modal-backdrop" on:click={closeModals}>
+		<div class="modal-backdrop" on:click={closeModals} transition:fade={{ duration: 300 }}>
 			<div class="modal-content" on:click|stopPropagation>
-				<div>This is a game by Ashley Cai, Brown|RISD 2025.</div>
+				<div>BY ASHLEY CAI<br>
+					RISD GRAPHIC DESIGN <br>
+					DEGREE PROJECT 2025<br>
+					ADVISED BY EMILY RYE
+				</div>
 			</div>
 		</div>
 	{/if}
@@ -367,6 +373,8 @@
 		position: relative;
 		margin-bottom: 0.5em;
 		transition: opacity 0.8s ease-in-out;
+		font-family: "ROMMONO";
+
 	}
 	@media (max-width: 480px) {
 		.footer {
@@ -436,6 +444,7 @@
 		z-index: 2;
 		position: relative;
 		transition: opacity 0.8s ease-in-out;
+		font-family: "ROMMONO";
 	}
 	.logo {
 		font-size: 3em;
@@ -493,11 +502,12 @@
 	}
 
 	.modal-content {
-		background: white;
+		background: var(--mid-gray);
+		font-family: "ROMMONO";
 		padding: 2em;
 		border-radius: 1em;
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-		max-width: 400px;
+		max-width: 300px;
 		text-align: center;
 		cursor: auto;
 	}

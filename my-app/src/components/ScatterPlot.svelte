@@ -75,7 +75,7 @@
     if (gameCounter == 5) {
       gameStart = "display: flex;";
       setTimeout(() => {
-        typeWriter("title", "SYNONYMS", 70);
+        typeWriter("title", "SYNONYM", 70);
       }, 1000);
       setTimeout(() => {
         typeWriter("title", "", 70);
@@ -88,8 +88,8 @@
         typeWriter("long", "LONG");
       }, 3000);
       setTimeout(() => {
-        typeWriter("instructions", "HEAT OVER MEDIUM LOW. (4)");
-        typeWriter("game-title", "SYNONYMS");
+        typeWriter("instructions", "HEAT OVER MEDIUM. (4)");
+        typeWriter("game-title", "6:SYNONYM");
 
 
       }, 4000);
@@ -267,6 +267,16 @@
 
     const svgElement = d3.select(svg);
 
+    svgElement.append("defs").html(`
+  <filter id="glow" x="-50%" y="-50%" width="250%" height="250%">
+    <feGaussianBlur stdDeviation="3" result="blur" />
+    <feMerge>
+      <feMergeNode in="blur" />
+      <feMergeNode in="SourceGraphic" />
+    </feMerge>
+  </filter>
+`);
+
     // Create axes
     const xAxis = d3.axisBottom(xScale).ticks(5).tickValues([]).tickSize(0);
     const yAxis = d3.axisLeft(yScale).ticks(5).tickValues([]).tickSize(0);
@@ -362,61 +372,68 @@
       .attr("id", "long")
 
     // Set up drag behavior
-    const drag = d3.drag().on("drag", function (event, d) {
-      // Get the position of the mouse relative to the SVG container
-      const [xPos, yPos] = d3.pointer(event, svgElement.node());
+    let dragOffset = { x: 0, y: 0 };
 
-      // Update the point's position based on the scales
-      d.x = Math.max(-10, Math.min(10, xScale.invert(xPos)));
-      d.y = Math.max(-10, Math.min(10, yScale.invert(yPos)));
+const drag = d3
+  .drag()
+  .on("start", function (event, d) {
+    const [initialX, initialY] = d3.select(this)
+      .attr("transform")
+      .match(/translate\(([^,]+),([^)]+)\)/)
+      .slice(1, 3)
+      .map(Number);
 
-      // Update the circle's position and text
-      d3.select(this).attr(
-        "transform",
-        `translate(${xScale(d.x)},${yScale(d.y)})`,
-      );
+    dragOffset.x = event.x - initialX;
+    dragOffset.y = event.y - initialY;
+  })
+  .on("drag", function (event, d) {
+    const correctedX = event.x - dragOffset.x;
+    const correctedY = event.y - dragOffset.y;
+
+    d.x = Math.max(-10, Math.min(10, xScale.invert(correctedX)));
+    d.y = Math.max(-10, Math.min(10, yScale.invert(correctedY)));
+
+    d3.select(this)
+      .attr("transform", `translate(${xScale(d.x)},${yScale(d.y)})`);
+
+    d3.select(this)
+      .select("text")
+      .text(determineText(d.x, d.y, d.id).toUpperCase());
+
+    if (hint2) {
+      const color = determineColor(d.x, d.y, d.id, d.cx, d.cy);
       d3.select(this)
-        .select("text")
-        .text(determineText(d.x, d.y, d.id).toUpperCase());
-
-      if (hint2) {
-        d3.select(this)
-          .select("circle")
-          .attr("fill", determineColor(d.x, d.y, d.id, d.cx, d.cy))
-          .style(
-            "filter",
-            `drop-shadow(0px 0px 4px ${determineColor(d.x, d.y, d.id, d.cx, d.cy)})`,
-          );
+        .select("circle")
+        .attr("fill", color)
+        .attr("filter", "url(#glow)")
       }
 
-      //win condition
+    if (areArraysEqual(currentWords, correctWords)) {
+      d3.selectAll(".label-text")
+        .transition()
+        .delay(500)
+        .duration(1000)
+        .attr("fill", correctGreen);
 
-      if (areArraysEqual(currentWords, correctWords)) {
-        d3.selectAll(".label-text")
-          .transition()
-          .delay(500)
-          .duration(1000)
-          .attr("fill", correctGreen);
-        // .attr("font-weight", "bold")
+      d3.selectAll(".scatter-point")
+        .transition()
+        .delay(500)
+        .duration(1000)
+        .attr("fill", correctGreen);
 
-        d3.selectAll(".scatter-point")
-          .transition()
-          .delay(500)
-          .duration(1000)
-          .attr("fill", correctGreen);
-        // .style("filter", `drop-shadow(0px 0px 4px ${correctGreen})`)
+      setTimeout(() => {
+        gameContentOpacity.target = 0;
+      }, 2000);
 
-        setTimeout(() => {
-          gameContentOpacity.target = 0;
-        }, 2000);
+      setTimeout(() => {
+        transitionHeight = gameContainerHeight.target;
+        transitionWidth = gameContainerWidth.target;
+        gameCounter = 6;
+      }, 3000);
+    }
+  });
 
-        setTimeout(() => {
-          transitionHeight = gameContainerHeight.target;
-          transitionWidth = gameContainerWidth.target;
-          gameCounter = 6;
-        }, 3000);
-      }
-    });
+
 
     function determineText(x, y, id) {
       if (id == 1) {
@@ -474,20 +491,22 @@
     var circle = elemEnter
   .append("circle")
   .attr("class", "scatter-point")
-  .attr("r", 0) // start small
+  .attr("r", 0)
   .attr("stroke", "transparent")
   .attr("fill", lightGray)
   .attr("stroke-width", 50)
-  .style("filter", `drop-shadow(0px 0px 4px ${lightGray})`)
+  .attr("filter", "url(#glow)");
+
+circle
   .transition()
-  .delay((_, i) => 3000 + i * 100) // stagger for extra bounce impact
+  .delay((_, i) => 3000 + i * 100)
   .duration(300)
   .ease(d3.easeCubicOut)
-  .attr("r", 7) // overshoot for bounce
+  .attr("r", 7)
   .transition()
   .duration(200)
   .ease(d3.easeCubicOut)
-  .attr("r", 5); // settle to final radius
+  .attr("r", 5);
 
     /* Create the text for each block */
     elemEnter
@@ -496,7 +515,7 @@
   .attr("dy", -16)
   .attr("text-anchor", "middle")
   .attr("fill", lightGray)
-  .style("filter", `drop-shadow(0px 0px 4px ${lightGray})`)
+  .attr("filter", "url(#glow)")
   .style("opacity", 0) // start hidden
   .text((d) => determineText(d.x, d.y, d.id).toUpperCase())
   .transition()
@@ -516,7 +535,7 @@
             return 4;
           })
           .attr("text-anchor", "middle")
-          .attr("font-size", ".7em")
+          .attr("font-size", "10px")
           .attr("font-weight", "bold")
           .attr("class", "circle-numbers")
           .attr("fill", darkGray)
@@ -539,7 +558,7 @@
             return color;
             // return lightGray;
           })
-          .style("filter", `drop-shadow(0px 0px 4px ${color})`);
+          .attr("filter", "url(#glow)")
 
         hint2 = true;
         hintsLeft = 0;
@@ -571,6 +590,7 @@
     style="--dark-gray: {darkGray}; --mid-gray: {midGray}; --light-gray: {lightGray}; width:{gameContainerWidth.current +
       'px'}; height:{gameContainerHeight.current + 'px'};"
   >
+  <div class="game-contents" style="opacity: {gameContentOpacity.current}">
     <div class="instructions-container">
       <div id="game-title"></div>
       <div id="instructions"></div>
@@ -578,12 +598,11 @@
         <div class="hint-button" on:click={hintButton}>
           <span>(?)</span> <span style="font-size:10px;">{hintsLeft}</span>
         </div>
-        <span class="tooltip-text">USE A HINT! I WONT JUDGE YOU...</span>
+        <span class="tooltip-text">USE A HINT! MIGHT AS WELL...</span>
       </div>
     </div>
-    <div class="game-contents" style="opacity: {gameContentOpacity.current}">
       <div class="scatterplot-container">
-        <svg bind:this={svg} {width} {height} overflow="visible"></svg>
+        <svg bind:this={svg} {width} {height} overflow="visible" style="touch-action: none;"></svg>
       </div>
     </div>
   </div>
@@ -626,6 +645,7 @@
   }
 
   .game-contents {
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -668,8 +688,7 @@
     font-size: 2em;
   }
 
-  :global(circle) {
-    /* -webkit-filter: drop-shadow( 0px 0px 4px var(--light-gray)); */
+  :global(.scatter-point) {
     cursor: grab;
     transition: filter 0.3s ease-in-out; /* Animation duration and effect */
   }
