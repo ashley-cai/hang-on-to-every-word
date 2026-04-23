@@ -169,6 +169,7 @@
     if (typeof window !== "undefined") {
       handleResize(); // set initial size
       window.addEventListener("resize", handleResize);
+      document.addEventListener("mouseup", handleDocumentMouseUp);
     }
 
     // get cognate data
@@ -190,6 +191,21 @@
 
   // Variable to hold the dynamically updated content with highlighted text
   let highlightedContent = content;
+
+  // Clear all highlights when the user clicks without dragging to select text
+  function handleDocumentMouseUp() {
+    // Defer so the browser has finished updating the selection
+    setTimeout(() => {
+      const selection = window.getSelection();
+      const selectedString = selection ? selection.toString() : "";
+      if (!selectedString || selectedString.trim() === "") {
+        tappedWords = new Set();
+        if (structuredData) {
+          getHighlightedContent([]);
+        }
+      }
+    }, 0);
+  }
 
   // Detect the selected text when the mouse is released
   function highlightSelectedText() {
@@ -364,6 +380,7 @@
   onDestroy(() => {
     if (typeof window !== "undefined") {
       window.removeEventListener("resize", handleResize);
+      document.removeEventListener("mouseup", handleDocumentMouseUp);
     }
   });
 </script>

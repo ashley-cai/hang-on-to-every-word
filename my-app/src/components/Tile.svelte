@@ -67,10 +67,6 @@ onMount(() => {
     max-width: fit-content;
     z-index: 1;
     box-shadow: 0px 0px 8px 1.5px var(--light-gray);
-    transition:
-      background-color 1s ease-in-out,
-      box-shadow 1s ease-in-out,
-      opacity 1s 1s ease-in-out;
   }
   @media (max-width: 480px) {
     .square {

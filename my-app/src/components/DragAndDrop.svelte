@@ -274,9 +274,36 @@
 		window.addEventListener("mouseup", checkConditions);
 		window.addEventListener("touchend", checkConditions);
 
+		// The svelte-dnd-action library sets `transition: top 0.2s, left 0.2s, ...`
+		// as an inline style on its dragged clone (#dnd-action-dragged-el). If
+		// top/left are updated after the clone is already in the DOM (which happens
+		// with centreDraggedOnCursor, or due to a setTimeout ordering race), the
+		// clone visibly slides to the wrong position. Patching the inline style
+		// here is the only reliable way to suppress that — CSS !important cannot
+		// override inline styles in all browsers/configurations.
+		const dragCloneObserver = new MutationObserver((mutations) => {
+			for (const mutation of mutations) {
+				for (const node of mutation.addedNodes) {
+					if (node instanceof HTMLElement && node.id === "dnd-action-dragged-el") {
+						// Kill all transitions immediately so top/left snap instead of slide.
+						node.style.setProperty("transition", "none");
+						// Re-enable transform transition on the next frame so the
+						// drop snap-back animation still works.
+						requestAnimationFrame(() => {
+							if (document.getElementById("dnd-action-dragged-el") === node) {
+								node.style.setProperty("transition", "transform 0.2s ease");
+							}
+						});
+					}
+				}
+			}
+		});
+		dragCloneObserver.observe(document.body, { childList: true });
+
 		return () => {
 			window.removeEventListener("mouseup", checkConditions);
 			window.removeEventListener("touchend", checkConditions);
+			dragCloneObserver.disconnect();
 		};
 	});
 </script>
@@ -592,6 +619,7 @@
 	.tile-container:focus {
 		outline: none;
 	}
+
 
 	/* Style for the text with an animated underline */
 	.underline-animation {

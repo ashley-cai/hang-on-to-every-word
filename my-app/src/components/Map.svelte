@@ -559,7 +559,7 @@ document.addEventListener("touchend", onMouseUp);
     transition: rotate 200ms;
     cursor: grab;
     transition:
-      background-image 1s linear,
+      background-image .1s linear,
       opacity 1s linear,
       rotate 200ms;
     opacity: 1;
